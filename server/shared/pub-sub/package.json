@@ -1,0 +1,26 @@
+{
+    "name": "pub-sub",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/index.js",
+    "types": "src/index.ts",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "clean": "rm -rf dist tsconfig.tsbuildinfo",
+      "build": "tsc --incremental"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "typescript": "^5.0.4"
+    },
+    "dependencies": {
+      "config": "workspace:*",
+      "queue": "workspace:*",
+      "ioredis": "^5.3.2",
+      "logger": "workspace:*",
+      "reflect-metadata": "^0.1.13",
+      "typedi": "^0.10.0"
+    }
+  }
+  

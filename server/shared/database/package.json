@@ -1,0 +1,30 @@
+{
+  "name": "database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "build": "tsc --incremental",
+    "db:sync-models": "prisma migrate dev",
+    "ci:setup": "prisma generate",
+    "db:prod-sync-models": "prisma db push",
+    "start:setup": "pnpm run db:prod-sync-models"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.15.0",
+    "config": "workspace:*",
+    "dotenv": "^16.0.3",
+    "logger": "workspace:*",
+    "prisma": "^4.15.0",
+    "reflect-metadata": "^0.1.13",
+    "typedi": "^0.10.0"
+  }
+}

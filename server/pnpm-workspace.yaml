@@ -1,0 +1,5 @@
+packages:
+- api/*
+- apps/*
+- backend/*
+- shared/*
