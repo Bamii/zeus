@@ -26,3 +26,8 @@ jobs:
 
       - name: Show which dirs changed.
         run: awk '{ print $1}' FS=/ $HOME/files.txt
+
+      - name: build server
+        run: |
+          awk '{ print $1}' FS=/ $HOME/files.txt | grep server
+          &? && cd server && ls
