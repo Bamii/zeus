@@ -23,3 +23,6 @@ jobs:
 
       - name: Show files changed
         run: cat $HOME/files.txt
+
+      - name: Show which dirs changed.
+        run: awk '{ print $1}' FS=/ $HOME/files.txt
