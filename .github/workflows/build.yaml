@@ -27,11 +27,21 @@ jobs:
       - name: Show which dirs changed.
         run: awk '{ print $1}' FS=/ $HOME/files.txt
 
-      - name: build server
+      - name: build and deploy server
         run: |
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
-          if [ $res -eq 0 ]; then 
+          if [ $res -eq 1 ]; then 
             cd server && ls 
           else
-            echo "heyyy"
+            echo "no deploy this time"
           fi
+
+      - name: build and deploy cli program
+        run: |
+          res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
+          if [ $res -eq 1 ]; then 
+            cd server && ls 
+          else
+            echo "no deploy this time"
+          fi
+          
