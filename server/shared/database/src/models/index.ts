@@ -23,17 +23,30 @@ export type User = {
     name: string
     email: string
     password: string
+    key?: Key
+    config?: Config
+    devices?: Device[]
 }
 
 export type Device = {
     id: number
-    user_id: string
+    user_id: number
+    user?: User
     fingerprint: string
     platform: string
 }
 
 export type Config = {
     id: number
-    user_id: string
+    user_id: number
+    user?: User
     hash: string
+}
+
+export type Key = {
+    id: number
+    key: string
+    key_id: string
+    user_id: number
+    user?: User
 }

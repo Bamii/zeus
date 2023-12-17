@@ -1,0 +1,36 @@
+include includes/header         
+
+main(class="text-center my-5 container max-w-[50rem] mx-auto max-lg:bg-[#FFEBC2]/80 rounded-lg p-12")
+  header(class="flex items-center justify-center mt-[7rem] mb-[3rem] text-[64px] font-[kalnia]")
+    h1 zeus
+      
+  div(class="space-y-[42px] text-24px flex flex-col")
+    div.space-y-2 
+      div(class="text-[32px] font-[kalnia]") what is zeus?
+      div zeus is simple. it helps you sync your installed packages across environments.
+
+    div.space-y-2
+      div(class="text-[32px] font-[kalnia]") how zeus works 
+      ul(class="md:w-[20rem] flex-wrap whitespace-normal text-left mx-auto space-y-[8px] list-[roman]") 
+        li register for an account.
+        li copy the api key on your dashbaord.
+        li.whitespace-normal 
+          a(href="/download") download and install zeus.
+        li.whitespace-normal link your computer (minion) to zeus. 
+          pre > zeus link api-key
+        li to install a package, prepend zeus to your install command.
+          pre.whitespace-normal > zeus scoop install -y zig 
+
+    div.space-y-2 
+      div(class="text-[32px] font-[kalnia]") which package managers are supported?
+      div(class="") scoop, chocolatey, rpm, apt-get, cargo, pacman, homebrew, snap
+
+    div.space-y-2 
+      div(class="text-[32px] font-[kalnia]") how many minions can i link?
+      div(class="") you can link a maximum of 3 minions at the moment.
+
+include includes/footer         
+
+script(src='https://unpkg.com/htmx.org@1.3.1')
+script(src='https://unpkg.com/hyperscript.org@0.0.5')
+script(src="/public/scripts/index.js")

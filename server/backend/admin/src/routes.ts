@@ -1,79 +1,21 @@
-import { Router, Response, NextFunction } from 'express'
-import log from 'logger'
+import { Router, Response } from 'express'
+//import log from 'logger'
 import { Container } from 'typedi'
-import DatabaseInstance from 'database'
-import QueueInstance from 'queue'
+//import QueueInstance from 'queue'
 import { sendError, sendSuccess, hash256 } from 'expressapp/src/utils'
-import { User, Config, Device } from 'database/src/models'
-import {
-    UserRepository,
-    ConfigRepository,
-    DevicesRepository,
-} from 'database/src'
-import { ApplicationError } from 'config'
-//import { extract, adminAuth, comparePassword, hashPassword, signJWT } from "auth"
+import { User } from 'database/src/models'
+import { ConfigRepository, DevicesRepository } from 'database/src'
 import * as validator from './middleware'
-import CacheInstance from 'cache'
+//import CacheInstance from 'cache'
 import StorageInstance from 'storage'
-import { Unkey } from '@unkey/api'
 import { apiKeyAuth, isDeviceRegistered } from 'auth'
 import fs from 'fs/promises'
 
-const unkey = new Unkey({ rootKey: 'unkey_3ZnyCB4BHxHbJbvfaWSihqRX' })
 const router = Router()
-//const queue = Container.get(QueueInstance)
 //const cache = Container.get(CacheInstance)
 const storage = Container.get(StorageInstance)
-const userRepository = Container.get(UserRepository)
 const configRepository = Container.get(ConfigRepository)
 const devicesRepository = Container.get(DevicesRepository)
-
-// onboard...
-router.post('/register', validator.registerUser, async (_req, res, next) => {
-    try {
-        let user = await userRepository.getUser({ email: _req.body.email })
-
-        if (user) return sendError(res, "There's a user with that email.")
-
-        user = await userRepository.createUser(_req.body)
-
-        const created = await unkey.keys.create({
-            apiId: 'api_8qR9AiEBdvrUCAuES4q569',
-            byteLength: 16,
-            ownerId: `${user.id}`,
-            meta: {},
-        })
-
-        // save the key.
-        console.log(created)
-        console.log(user)
-
-        return sendSuccess(res, 'something is up')
-    } catch (error: any) {
-        console.log(error)
-        return sendError(res, 'An Error Occured')
-    }
-})
-
-// admin logins...
-router.post('/login', validator.loginValidator, async (req, res, next) => {
-    try {
-        let user = await userRepository.getUser({ email: req.body.email })
-
-        if (!user)
-            return sendError(res, "There's no user with that email.", {
-                status: 401,
-            })
-
-        // save the key.
-        console.log(user)
-
-        return sendSuccess(res, 'something is up')
-    } catch (error: any) {
-        console.log(error)
-        return sendError(res, 'An Error Occured')
-    }
-})
 
 // link your laptop
 router.post(
@@ -121,16 +63,14 @@ router.post(
     isDeviceRegistered,
     async (req: any & { user: User }, res: Response) => {
         try {
-            const userid = req.user.id
+            const userid = parseInt(req.user.id)
             const config = await configRepository.getConfig({
-                user_id: `${userid}`,
+                user_id: userid,
             })
 
             const file = atob(req.body.config)
             const hash = hash256(file)
 
-            console.log(hash)
-            console.log(config.hash)
             if (hash === config?.hash) {
                 return sendError(res, 'file already uploaded', { status: 500 })
             }
@@ -156,9 +96,9 @@ router.get(
     isDeviceRegistered,
     async (req: any & { user: User }, res: Response) => {
         try {
-            const userid = req.user.id
+            const userid = parseInt(req.user.id)
             const config = await configRepository.getConfig({
-                user_id: `${userid}`,
+                user_id: userid,
             })
 
             if (!config)

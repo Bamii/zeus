@@ -1,5 +1,6 @@
 import { Service, Container } from 'typedi'
 import { Database, User } from '../models/index'
+import { Prisma } from '@prisma/client'
 //import { Prisma } from '../impl/prisma'
 //import Database from '../index'
 
@@ -11,10 +12,13 @@ export default class UserRepository {
     }
 
     getUser(find: Partial<User>) {
-        return this.database.getClient().user.findUnique({ where: find })
+        return this.database.getClient().user.findUnique({
+            where: find,
+            include: { key: true, config: true, devices: true },
+        })
     }
 
-    async createUser(user: Omit<User, 'id'>) {
+    async createUser(user: Prisma.UserCreateInput) {
         //console.log(this.database)
         return this.database.getClient().user.create({ data: user })
     }

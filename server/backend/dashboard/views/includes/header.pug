@@ -1,0 +1,38 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Kalnia:wdth,wght@100,400;112.5,500&display=swap" rel="stylesheet")
+
+    link(rel="preconnect" href="https://fonts.googleapis.com")
+    link(rel="preconnect" href="https://fonts.gstatic.com" crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Afacad&family=Kalnia:wdth,wght@100,400;112.5,500&display=swap" rel="stylesheet")
+    script(src="https://cdn.tailwindcss.com")
+
+    title zeus
+
+
+  body(class="mx-7 flex flex-col font-[afacad] text-[22px] h-screen overflow-scroll bg-[#ffe6b675] before:block before:z-[-10] before:fixed before:h-screen before:w-screen before:bg-no-repeat before:bg-right-bottom before:bg-[url(https://res.cloudinary.com/bambam/image/upload/v1702674937/wg37kikksu7koslhvfzg.png)]")
+    section(class="w-full mx-auto pt-[2rem] max-w-[50rem]") 
+      nav 
+        ul(class="gap-4 flex list-inside")
+          li(class="max-w-max _rotate-[25deg] min-w-[1rem]") 
+            a(href="/") home 
+          li(class="max-w-max _mt-[1.5rem] _rotate-[-58deg] min-w-[1rem]") 
+            a(href="/download") download 
+          if auth
+            li(class="max-w-max _mt-[1.5rem] _rotate-[-50deg] min-w-[1rem]") 
+              a(href="/dashboard")  dashboard 
+            li(class="max-w-max _mt-[1.5rem] _rotate-[-50deg] min-w-[1rem]") 
+              a(href="/logout" hx-get="/logout") logout 
+          else 
+            li(class="max-w-max _mt-[2.5rem] _rotate-[48deg] min-w-[1rem]")
+              a(href="/signup") signup 
+            li(class="max-w-max _mt-[1.5rem] _rotate-[-50deg] min-w-[1rem]") 
+              a(href="/login")  login 
+            
+
+ 

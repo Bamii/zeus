@@ -13,20 +13,31 @@ const deviceRepository = Container.get(DevicesRepository)
 const SALT_ROUNDS = config.salt_rounds
 const TOKEN_SECRET_KEY = config.token_secret
 
-export const clientAuth = () => {
+export const clientAuth = ({
+    redirect,
+    passthrough,
+}: { passthrough?: boolean; redirect?: boolean } = {}) => {
     return async (req: any & User, res: Response, next: NextFunction) => {
-        const { authorization } = req.headers
+        const { authorization: header_authorization } = req.headers
+        const { authorization: cookie_authorization } = req.cookies
+
+        let authorization = header_authorization || cookie_authorization
         try {
             if (!authorization) throw new ApplicationError('closed sesame')
+            let token
+            if (header_authorization) {
+                let [protocol, _token] = header_authorization.split(' ')
 
-            const [protocol, token] = authorization.split(' ')
-            if (protocol !== 'Bearer' || !token)
-                throw new ApplicationError('gerrarahia! you sly being.')
+                token = _token
+                if (protocol !== 'Bearer' || !token)
+                    throw new ApplicationError('gerrarahia! you sly being.')
+            } else {
+                token = cookie_authorization
+            }
 
             const result = jwt.verify(token, TOKEN_SECRET_KEY)
             const { email } = result as { email: string }
-            //const user = await database.getUserByEmailOrPhone({ email })
-            const user = { email }
+            const user = await userRepository.getUser({ email })
 
             if (!user)
                 throw new ApplicationError(
@@ -36,8 +47,17 @@ export const clientAuth = () => {
             req.user = user
             return next()
         } catch (error: any) {
-            if (error instanceof ApplicationError)
-                return sendError(res, error.message, { status: 401 })
+            if (passthrough) return next()
+
+            if (redirect) {
+                res.setHeader('HX-Redirect', '/')
+                res.redirect('/')
+                return
+            }
+            if (error instanceof ApplicationError) {
+                if (redirect) return res.redirect('/')
+                else return sendError(res, error.message, { status: 401 })
+            }
 
             return sendError(res, 'An application error occured.', {
                 status: 500,
@@ -46,9 +66,7 @@ export const clientAuth = () => {
     }
 }
 
-export const signJWT = <T extends string | Record<string, string>>(
-    value: T
-) => {
+export const signJWT = <T extends string | Record<string, any>>(value: T) => {
     return jwt.sign(value, TOKEN_SECRET_KEY)
 }
 
@@ -80,7 +98,7 @@ export const isDeviceRegistered = async (
     next: NextFunction
 ) => {
     const fingerprint = req.body.fingerprint
-    const user_id = req.user.id
+    const user_id = parseInt(req.user.id)
 
     const device = await deviceRepository.getUsersDevice(user_id, fingerprint)
 
