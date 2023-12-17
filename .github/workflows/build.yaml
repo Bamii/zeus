@@ -29,8 +29,8 @@ jobs:
 
       - name: build server
         run: |
-          res=(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server)
-          if [ $? -eq 0 ]; then 
+          res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
+          if [ $res -eq 0 ]; then 
             cd server && ls 
           else
             echo "heyyy"
