@@ -230,7 +230,6 @@ router.post(
     }
 )
 
-// get the most recent config for user.
 router.get(
     '/config/latest',
     apiKeyAuth,
