@@ -29,5 +29,7 @@ jobs:
 
       - name: build server
         run: |
-          awk '{ print $1}' FS=/ $HOME/files.txt | grep server
-          if [ $? -eq 0 ]; then cd server && ls fi
+          awk '{ print $1 }' FS=/ $HOME/files.txt | grep server;
+          if [ $? -eq 0 ]; then 
+            cd server && ls 
+          fi
