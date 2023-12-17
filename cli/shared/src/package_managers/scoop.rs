@@ -13,16 +13,6 @@ pub fn uninstall_command() -> clap::Command {
         .subcommand(clap::Command::new("uninstall").args(&[arg!([NAME] ...).id("uninstall")]))
 }
 
-fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("{:?}", arr);
-    Some((String::from(""), vec![]))
-}
-
-fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("{:?}", arr);
-    Some((String::from(""), vec![]))
-}
-
 pub fn default() -> PackageManager {
     PackageManager {
         uninstall_command,

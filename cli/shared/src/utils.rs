@@ -1,32 +1,29 @@
-#![feature(ascii_char)]
-
 extern crate mac_address;
 
 use base64::{engine::general_purpose, Engine as _};
+use hex;
 use mac_address::get_mac_address;
 use reqwest;
-use hex;
 use serde::Deserialize;
 use serde_json;
 use serde_yaml;
-use sha256::{digest, try_digest};
+use sha256::digest;
 use smol;
+use std::cmp::Ordering;
 use std::collections::HashMap;
-use std::env;
 use std::fs;
-use std::u8;
-use std::fmt::Display;
 use std::path;
 use std::process;
+use std::u8;
 
-use crate::models::package::{new as new_package_manifest, PackageManifest};
+use crate::models::package::{PackageDetailsLocal, PackageManifest};
 use crate::models::package_manager_repository::{
     PackageManagerRepository, PackageManagerRepositoryActions,
 };
 
 use crate::package_managers::apt::default as apt;
 use crate::package_managers::choco::default as choco;
-use crate::package_managers::default::default as default_commander;
+//use crate::package_managers::default::default as default_commander;
 use crate::package_managers::default_command_only::default as default_command_only;
 use crate::package_managers::default_flag_only::default as default_flag_only;
 use crate::package_managers::pm::default as pacman;
@@ -79,9 +76,9 @@ pub fn run_command(cmds: &Vec<String>) -> Result<process::Output, std::io::Error
     }
 }
 
-pub async fn install_package_manager(_package_manager: String) {
+pub fn install_package_manager(_package_manager: String) {
     // fetch script from server, install script.
-    let url = String::from("https://dummyjson.com/quotes");
+    //let url = String::from("https://dummyjson.com/quotes");
     //let response = reqwest::get(url).await?;
 }
 
@@ -129,7 +126,7 @@ pub fn heimdall() -> String {
 pub fn make_authenticated_request() -> reqwest::Client {
     let mut headers = reqwest::header::HeaderMap::new();
 
-    let mut auth_value = reqwest::header::HeaderValue::from_static("3ZUbhJHFL1QgjMM9svBhy9uF");
+    let mut auth_value = reqwest::header::HeaderValue::from_static("3ZZeAn44S3NVhZugwTAqUunX");
     auth_value.set_sensitive(true);
     headers.insert(reqwest::header::AUTHORIZATION, auth_value);
 
@@ -167,11 +164,11 @@ pub fn update_cloud_file_config(content: &str) {
         println!("");
         println!("--------------------------------");
         println!("-- updating zeus config to the cloud...");
-        println!("--------------------------------");
 
         // -------------------------------------------------------------------
         let mut body = HashMap::new();
         body.insert("config", general_purpose::STANDARD_NO_PAD.encode(content));
+        body.insert("fingerprint", get_system_fingerprint());
 
         let res = make_authenticated_request()
             .post(olympus())
@@ -222,12 +219,136 @@ pub fn link_computer() {
                     println!("");
                 }
             },
-            Err(xx) => {
+            Err(_) => {
                 println!("an error occured while linking this computer");
                 println!("");
             }
         }
     });
+}
+
+pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerRepository) {
+    let platform = get_system_platform();
+    let local_config: PackageManifest = get_zeus_config();
+    let cloud_config: Option<PackageManifest> = get_latest_cloud_config().await;
+
+    if cloud_config.is_none() {
+        println!("");
+        return ();
+    }
+
+    let cloud_config = cloud_config.unwrap();
+
+    let cloud_config_packages: Vec<PackageDetailsLocal> = cloud_config
+        .packages
+        .values()
+        .map(|a| (*a).clone().into())
+        .map(|mut a: PackageDetailsLocal| {
+            a.typer = String::from("new");
+            a
+        })
+        .collect::<Vec<PackageDetailsLocal>>()
+        .into_iter()
+        .filter(|a| *a.platform == platform)
+        .collect();
+
+    let local_config_packages: Vec<PackageDetailsLocal> = local_config
+        .packages
+        .values()
+        .map(|a| (*a).clone().into())
+        .map(|mut a: PackageDetailsLocal| {
+            a.typer = String::from("old");
+            a
+        })
+        .collect::<Vec<PackageDetailsLocal>>()
+        .into_iter()
+        .filter(|a| *a.platform == platform)
+        .collect();
+
+    let mut package_collective = [&local_config_packages[..], &cloud_config_packages[..]].concat();
+
+    // sort and group by name
+    package_collective.sort_by(|a, b| a.name.partial_cmp(&b.name).unwrap());
+    let group_by_name = package_collective.group_by(|a, b| a.name.cmp(&b.name) == Ordering::Equal);
+
+    let mut diffed: Vec<&PackageDetailsLocal> = vec![];
+    println!(" --------> group by name: {:?}", &group_by_name);
+    println!("");
+    for group in group_by_name {
+        let mut _action = "install";
+
+        match group.len() {
+            1 => {
+                let vector = group.get(0).unwrap();
+                diffed.push(vector);
+
+                match vector.typer.as_str() {
+                    "new" => {}
+                    _ => _action = "uninstall",
+                };
+            }
+
+            _ => {
+                let new = match group.get(0).unwrap().typer.as_str() {
+                    "new" => group.get(0),
+                    _ => group.get(1),
+                };
+
+                let matched = group.get(0).unwrap().hash == group.get(1).unwrap().hash;
+                match matched {
+                    true => {}
+                    false => {
+                        diffed.push(new.unwrap());
+                    }
+                };
+            }
+        }
+    }
+
+    // sort the diffed packages and group them by vendors,
+    diffed.sort_by(|a, b| a.vendor.partial_cmp(&b.vendor).unwrap());
+    let group_by_vendor = diffed.group_by(|a, b| a.vendor.cmp(&b.vendor) == Ordering::Equal);
+    println!(" --------> diffed: {:?}", &diffed);
+    println!("");
+
+    println!(" --------> group by vendor: {:?}", &group_by_vendor);
+    for by_vendor in group_by_vendor {
+        let _vendor = &by_vendor.get(0).unwrap().vendor;
+        let vendor_repository = packages.get(_vendor).unwrap();
+        let mut rs: Vec<&PackageDetailsLocal> = by_vendor.iter().map(|a| *a).collect();
+
+        rs.sort_by(|a, b| a.typer.partial_cmp(&b.typer).unwrap());
+        let group_by_typer = rs.group_by(|a, b| a.typer.cmp(&b.typer) == Ordering::Equal);
+
+        for installation in group_by_typer {
+            let packages: Vec<String> = installation[..]
+                .iter()
+                .map(|a| a.name.to_string())
+                .collect();
+
+            match &installation.get(0).unwrap().typer.as_str() {
+                &"new" => {
+                    for package in &packages {
+                        let pkg = package.to_string();
+                        let _ = (vendor_repository.install)(&vec![pkg]).unwrap();
+                    }
+                }
+                &"old" => {
+                    for package in &packages {
+                        let pkg = package.clone();
+                        let _ = (vendor_repository.uninstall)(&vec![pkg]).unwrap();
+                    }
+                }
+                _ => panic!("never will happen"),
+            };
+
+            let content = serde_yaml::to_string(&cloud_config).unwrap();
+            update_local_file_config(content.as_str());
+            println!("------------------------------");
+        }
+
+        println!("");
+    }
 }
 
 pub async fn get_latest_cloud_config() -> Option<PackageManifest> {
@@ -278,8 +399,6 @@ pub fn get_system_fingerprint() -> String {
     match get_mac_address() {
         Ok(Some(ma)) => {
             let my_str = hex::encode(ma.bytes().to_vec());
-            println!("{:?}", my_str);
-
             digest(String::from(my_str) + &fingerprint)
         }
         _ => panic!("could not get system mac address."),

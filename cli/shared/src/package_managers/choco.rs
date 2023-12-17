@@ -2,16 +2,6 @@ use crate::models::package_manager::{PackageManager, PackageMeta};
 use crate::package_managers::default::default as default_package_manager;
 use clap::{arg, ArgAction};
 
-fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("{:?}", arr);
-    Some((String::from(""), vec![]))
-}
-
-fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("{:?}", arr);
-    Some((String::from(""), vec![]))
-}
-
 pub fn install_command() -> clap::Command {
     clap::Command::new("package").subcommand(
         clap::Command::new("install").args(&[arg!([NAME] ...)
@@ -29,7 +19,7 @@ pub fn parse_command(matches: &Vec<String>) -> Vec<String> {
 
     let mut result: Vec<Vec<&str>> = vec![];
     let mut refree = me.iter().peekable();
-    let mut values = me.iter().peekable();
+    let values = me.iter().peekable();
 
     let mut intermidiary: Vec<_> = vec![];
 
@@ -44,13 +34,13 @@ pub fn parse_command(matches: &Vec<String>) -> Vec<String> {
 
         match group.as_str() {
             "--version" | "-v" => {
-                &intermidiary.push(group.as_str());
-                &intermidiary.push(next);
+                let _ = &intermidiary.push(group.as_str());
+                let _ = &intermidiary.push(next);
                 in_works = "vers";
             }
             _ => match next {
                 "--version" | "-v" => {
-                    &intermidiary.push(group.as_str());
+                    let _ = &intermidiary.push(group.as_str());
                     in_works = "yes";
                 }
                 _ => {

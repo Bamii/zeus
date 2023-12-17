@@ -3,20 +3,17 @@
 use rand::{distributions::Alphanumeric, Rng};
 use seahorse;
 use serde_yaml;
-use sha256::digest;
-use std::cmp::Ordering;
+use smol;
 use std::collections::HashMap;
 use std::env;
-use std::process;
-use sysinfo::{System, SystemExt};
-use uuid::Uuid;
 
-use shared::models::package::{PackageDetails, PackageDetailsLocal, PackageManifest};
+use shared::models::package::{PackageDetails, PackageManifest};
 use shared::models::package_manager::{PackageManager, Parse};
 use shared::models::package_manager_repository::PackageManagerRepositoryActions;
 use shared::utils::{
-    display_banner, get_zeus_config, install_package_manager, link_computer, run_command,
-    setup_package_repository, update_cloud_file_config, update_local_file_config,
+    display_banner, get_and_install_latest_cloud_config, get_system_platform, get_zeus_config,
+    install_package_manager, link_computer, run_command, setup_package_repository,
+    update_cloud_file_config, update_local_file_config, get_zeus_config_string
 };
 
 ////////////////////////////////////////////////////////
@@ -29,7 +26,8 @@ async fn main() {
         .version(env!("CARGO_PKG_VERSION"))
         .usage("cli [name]")
         .action(default_action_wrapper)
-        .command(link_command());
+        .command(link_command())
+        .command(config_command());
 
     app.run(args);
 }
@@ -43,21 +41,53 @@ fn link_command() -> seahorse::Command {
         .description("link computer command")
         .alias("l")
         .usage("cli link(a) [nums...]")
-        .action(add_action)
+        .action(link_action)
 }
 
 fn config_command() -> seahorse::Command {
     seahorse::Command::new("config")
         .description("config command")
         .alias("c")
-        .usage("cli config")
-        .action(add_action)
+        .usage("config [upload | download]")
+        .command(
+            seahorse::Command::new("upload")
+                .description("upload your current config as the latest one")
+                .action(upload_config_action),
+        )
+        .command(
+            seahorse::Command::new("download")
+                .description("download the latest config")
+                .action(download_config_action),
+        )
+        .command(
+            seahorse::Command::new("apply")
+                .description("apply the current config. i.e: install all the packages in the current config.")
+                .action(download_config_action),
+        )
 }
 
-fn add_action(c: &seahorse::Context) {
+fn link_action(_: &seahorse::Context) {
     display_banner();
     println!("linking this computer to zeus...");
     link_computer();
+}
+
+fn download_config_action(_: &seahorse::Context) {
+    display_banner();
+    println!("downloading and applying the latest config...");
+
+    smol::block_on(async {
+        let packages_repository = setup_package_repository();
+        get_and_install_latest_cloud_config(&packages_repository).await;
+    })
+}
+
+fn upload_config_action(_: &seahorse::Context) {
+    display_banner();
+    println!("uploading the latest config to zeus...");
+
+    let config = get_zeus_config_string();
+    update_cloud_file_config(&config.as_str());
 }
 
 fn default_action(c: &seahorse::Context) -> Option<String> {
@@ -105,9 +135,6 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
 
             println!("{}", String::from_utf8(output.stdout).unwrap());
 
-            //let mtchs = (&package_manager.parse_command)(&active_command.2);
-            //        println!("mtchss: {:?}", mtchs);
-
             match output.status.success() {
                 true => {
                     update_packages(
@@ -118,14 +145,11 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
                     zeus_config.packages = packages;
 
                     // update the manifest
-                    match serde_yaml::to_string(&zeus_config) {
-                        Ok(content) => {
-                            update_local_file_config(&content.as_str());
+                    let content = serde_yaml::to_string(&zeus_config).unwrap();
 
-                            update_cloud_file_config(&content.as_str());
-                        }
-                        Err(_) => {}
-                    };
+                    update_local_file_config(&content.as_str());
+
+                    update_cloud_file_config(&content.as_str());
 
                     // update the manifest
                     Some("".to_string())
@@ -170,6 +194,7 @@ fn update_packages(
                         version: meta.version.to_string(),
                         flags: [].to_vec(),
                         hash,
+                        platform: get_system_platform(),
                         vendor: program.to_string(),
                     },
                 );
