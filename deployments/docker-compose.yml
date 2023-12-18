@@ -1,1 +1,6 @@
-
+services:
+  zeus:
+    image: 157918242220.dkr.ecr.us-east-1.amazonaws.com/zeus:latest
+    restart: always
+    ports:
+      - '4000:4000'
