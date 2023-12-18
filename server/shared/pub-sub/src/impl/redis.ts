@@ -23,9 +23,8 @@ export default class Redis implements PubSub {
     this.consuming = true;
     while (this.consuming) {
       try {
-        // log.info('starting dequeue.')
         let res = await this.queue.dequeue(topic, { topic: "" });
-        //log.info(res);
+        log.info(res);
         if (res)
           await callback(res);
       } catch (error: any) {
