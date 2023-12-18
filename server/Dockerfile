@@ -4,7 +4,7 @@ workdir /app
 
 run npm install -g pnpm
 
-copy * /app/
+copy . /app/
 
 workdir /app
 
