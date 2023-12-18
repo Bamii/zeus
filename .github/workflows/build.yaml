@@ -77,5 +77,6 @@ jobs:
             ls -al
           SCRIPT_AFTER: |
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REPOSITORY }}
+            cd zeus
             docker compose up -d
             
