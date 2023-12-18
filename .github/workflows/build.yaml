@@ -71,6 +71,6 @@ jobs:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
           script: |
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin {{ secrets.DOCKER_REPOSITORY }}
-            docker pull {{ secrets.DOCKER_REPOSITORY }}:latest
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REPOSITORY }}
+            docker pull ${{ secrets.DOCKER_REPOSITORY }}:latest
             
