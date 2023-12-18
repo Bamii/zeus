@@ -39,8 +39,8 @@ jobs:
           if [ $res -eq 1 ]; then 
             cd server && ls 
             docker build -t zeus .
-            docker tag zeus:latest $REGISTRY/$REPOSITORY:latest
-            docker push $REGISTRY/$REPOSITORY
+            docker tag zeus $REGISTRY/$REPOSITORY:latest
+            docker push $REGISTRY/$REPOSITORY:latest
             run: echo "::set-output name=server::true"
           else
             echo "no deploy this time"
