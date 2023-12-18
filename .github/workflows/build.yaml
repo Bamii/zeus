@@ -48,7 +48,7 @@ jobs:
             docker build -t zeus .
             docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
             docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
-            echo "::set-output name=server::true"
+            echo "server=true" >> "$GITHUB_OUTPUT"
           else
             echo "no deploy this time"
           fi
