@@ -41,10 +41,6 @@ jobs:
         
       - name: build and deploy server
         id: predeploy
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: zeus
-          IMAGE_TAG: latest
         run: |
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
           if [ $res -eq 1 ]; then 
@@ -52,7 +48,7 @@ jobs:
             docker build -t zeus .
             docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
             docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
-            run: echo "::set-output name=server::true"
+            echo "::set-output name=server::true"
           else
             echo "no deploy this time"
           fi
@@ -62,7 +58,7 @@ jobs:
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
-            run: echo "::set-output name=cli::true"
+            echo "::set-output name=cli::true"
           else
             echo "no deploy this time"
           fi
