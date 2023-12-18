@@ -10,7 +10,7 @@ permissions:
   contents: read
   
 jobs:
-  check-links:
+  predeploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,17 +28,6 @@ jobs:
       - name: Show which dirs changed.
         run: awk '{ print $1}' FS=/ $HOME/files.txt
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
-          role-session-name: samplerolesession
-          aws-region: us-east-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
       - name: build and deploy server
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -50,6 +39,7 @@ jobs:
             cd server && ls 
             docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
             docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+            run: echo "::set-output name=server::true"
           else
             echo "no deploy this time"
           fi
@@ -59,7 +49,40 @@ jobs:
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
+            run: echo "::set-output name=cli::true"
           else
             echo "no deploy this time"
           fi
           
+  deploy:
+    runs-on: ubuntu-latest
+    needs: predeploy
+    if: steps.predeploy.output.server == true
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+          role-session-name: samplerolesession
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Deploy to Staging server
+        if: steps.predeploy.output.server == true
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          SOURCE: "deployments/terraform/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          SCRIPT_BEFORE: | 
+            ls -al
+          SCRIPT_AFTER: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin {{ secrets.DOCKER_REPOSITORY }}
+            docker pull {{ secrets.DOCKER_REPOSITORY }}:latest
+            
