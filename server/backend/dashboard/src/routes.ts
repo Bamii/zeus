@@ -41,7 +41,7 @@ router.get(
     '/signup',
     clientAuth({ passthrough: true }),
     (req: any & User, res) => {
-        res.render('signup', { auth: !!req.user })
+        res.render('signup', { auth: !!req.user });
     }
 )
 
