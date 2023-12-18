@@ -76,6 +76,6 @@ jobs:
           SCRIPT_BEFORE: | 
             ls -al
           SCRIPT_AFTER: |
-            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin {{ secrets.DOCKER_REPOSITORY }}
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REPOSITORY }}
             docker compose up -d
             
