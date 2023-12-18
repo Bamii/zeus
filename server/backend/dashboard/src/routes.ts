@@ -17,7 +17,7 @@ import { apiKeyAuth, isDeviceRegistered } from 'auth'
 import fs from 'fs/promises'
 
 const unkey = new Unkey({ rootKey: 'unkey_3ZnyCB4BHxHbJbvfaWSihqRX' })
-const router = Router()
+const router = Router();
 //const cache = Container.get(CacheInstance)
 const userRepository = Container.get(UserRepository)
 const keyRepository = Container.get(KeyRepository)
