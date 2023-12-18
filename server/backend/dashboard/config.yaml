@@ -1,7 +1,0 @@
-version: '1'
-packages:
-  terraform:
-    name: terraform
-    version: e72b39c16e9e5f45e9e4ed742b77e08fd6433dfd57628f71c2182c8e16accf2c
-    flags: []
-    vendor: choco
