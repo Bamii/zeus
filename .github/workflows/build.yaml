@@ -96,6 +96,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
+          SRC_DIR: cli
+          ARCHIVE_NAME: ${{ matrix.label }}.${{ matrix.archive }}
+          MINIFY: true
+          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
@@ -140,15 +144,10 @@ jobs:
         if: ${{ steps.read-data.outputs.server }} == true
         id: predeploy
         run: |
-          res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
-          if [ $res -eq 1 ]; then 
-            cd server && ls 
-            docker build -t zeus .
-            docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
-            docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
-          else
-            echo "no deploy this time"
-          fi
+          cd server && ls 
+          docker build -t zeus .
+          docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
+          docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
 
       - name: Deploy to Staging server
         if: ${{ steps.read-data.outputs.server }} == true
