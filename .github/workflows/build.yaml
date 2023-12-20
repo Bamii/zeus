@@ -8,9 +8,9 @@ on:
 permissions:
   id-token: write
   contents: read
-  
+
 jobs:
-  check-links:
+  predeploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,39 +26,144 @@ jobs:
         run: cat $HOME/files.txt
 
       - name: Show which dirs changed.
-        run: awk '{ print $1}' FS=/ $HOME/files.txt
+        run: awk '{ print $1 }' FS=/ $HOME/files.txt
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
-          aws-region: aws-region-1
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: build and deploy server
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: zeus
-          IMAGE_TAG: latest
+      - name: determine if to build server
+        id: predeploy
         run: |
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
-            docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-            docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+            echo "server=true" >> $GITHUB_OUTPUT
           else
             echo "no deploy this time"
           fi
 
-      - name: build and deploy cli program
+      - name: Set server deploy data
+        if: ${{ steps.predeploy.outputs.cli }} == true
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: set-data
+          data: |
+            server: true
+
+      - name: determine if to build cli
         run: |
           res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
+            echo "cli=true" >> $GITHUB_OUTPUT
+          else
+            cd cli && ls 
+            
+            echo "no deploy this time"
+          fi
+
+      - name: Set cli deploy data
+        if: ${{ steps.predeploy.outputs.cli }} == true
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: set-data
+          data: |
+            cli: true
+
+  deploy_cli:
+    needs: predeploy
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-gnu
+            label: windows
+            archive: zip
+          - target: x86_64-unknown-linux-musl
+            label: linux
+            archive: tar.gz tar.xz tar.zst
+          - target: x86_64-apple-darwin
+            label: macos
+            archive: zip
+    steps:
+      - name: Read data
+        id: read-data # must have an id so that you can access the output from this step which contains the shared data
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: read-data-current-workflow
+
+      - name: Compile and release
+        if: ${{ steps.read-data.outputs.cli }} == true
+        uses: rust-build/rust-build.action@v1.4.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.label }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+
+      - name: Show files changed
+        run: ls
+
+      #- uses: jakejarvis/s3-sync-action@master
+      #  if: ${{ steps.predeploy.outputs.cli }} == true
+      #with:
+      #  args: --acl public-read --follow-symlinks --delete
+      #        env:
+      #  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      #          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #          AWS_REGION: "us-west-1" # optional: defaults to us-east-1
+      #          SOURCE_DIR: "public" # optional: defaults to entire repository
+
+  deploy_server:
+    needs: predeploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read data
+        id: read-data # must have an id so that you can access the output from this step which contains the shared data
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: read-data-current-workflow
+
+      - name: Configure AWS credentials
+        if: ${{ steps.read-data.outputs.server }} == true
+        uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+          role-session-name: samplerolesession
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        if: ${{ steps.read-data.outputs.server }} == true
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: build and deploy server
+        if: ${{ steps.read-data.outputs.server }} == true
+        id: predeploy
+        run: |
+          res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
+          if [ $res -eq 1 ]; then 
+            cd server && ls 
+            docker build -t zeus .
+            docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
+            docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
           else
             echo "no deploy this time"
           fi
-          
+
+      - name: Deploy to Staging server
+        if: ${{ steps.read-data.outputs.server }} == true
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          SOURCE: "/deployments/*"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          SCRIPT_BEFORE: |
+            ls -al
+          SCRIPT_AFTER: |
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REPOSITORY }}
+            cd zeus
+            docker compose pull
+            docker compose up -d

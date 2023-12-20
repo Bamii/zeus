@@ -16,7 +16,6 @@ export default class KeyRepository {
     }
 
     async create(user: Prisma.KeyCreateManyInput) {
-        //console.log(this.database)
         return this.database.getClient().key.create({ data: user })
     }
 }

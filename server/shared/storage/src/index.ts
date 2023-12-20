@@ -1,4 +1,4 @@
-// Create a single supabase client for interacting with your database
+// Create a single supabase client for interacting with the storage.
 import { Token } from 'typedi'
 import Supabase from './impl/supabase'
 
