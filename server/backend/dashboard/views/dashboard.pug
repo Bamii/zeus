@@ -28,8 +28,8 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
         div(class="w-full border border-[#3D2800] rounded-lg p-3 flex flex-col justify-end") 
           a(href="") download latest config...
 
-  div(class="grid md:grid-cols-2 gap-10 py-6")
-    div(class="w-full m-5 mx-auto")
+  div(class="flex gap-10 py-6")
+    div(class="max-w-[20rem] m-5 mx-auto")
       div(class="p-3 rounded relative") 
         div(class="before:h-[1rem] before:w-full before:bottom-0 before:block before:mt-auto before:absolute before:-inset-1 before:-skew-y-3 before:bg-[#E07A5F]")
           div quick setup::
@@ -37,7 +37,7 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
       ul(class="lg:w-[20rem] mt-5 flex-wrap whitespace-normal text-left mx-auto space-y-[8px] list-[roman]") 
         li copy the api key on your dashbaord.
         li.whitespace-normal 
-          a(href="/download") download and install zeus.
+          a(href="" download="#{download_link}" class="underline underline-offset-[3px]") download and install zeus.
         li.whitespace-normal link your computer (minion) to zeus. 
           pre > zeus link api-key
         li to install a package, prepend zeus to your install command.

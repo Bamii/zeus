@@ -3,7 +3,6 @@ extern crate mac_address;
 use base64::{engine::general_purpose, Engine as _};
 use hex;
 use mac_address::get_mac_address;
-use reqwest;
 use serde::Deserialize;
 use serde_json;
 use serde_yaml;
@@ -88,16 +87,17 @@ pub fn get_zeus_config_path() -> String {
     String::from(config_path.to_str().unwrap())
 }
 
+pub fn get_bolt_path() -> String {
+    let mut config_path = path::PathBuf::from(get_zeus_dir());
+    config_path.push("bolt.txt");
+    String::from(config_path.to_str().unwrap())
+}
+
 pub fn get_zeus_dir() -> String {
     if cfg!(target_os = "windows") {
         String::from(path::PathBuf::from(r"C:\.zeus").as_path().to_str().unwrap())
     } else {
-        String::from(
-            path::PathBuf::from("/etc/.zeus")
-                .as_path()
-                .to_str()
-                .unwrap(),
-        )
+        String::from(path::PathBuf::from("/etc/zeus").as_path().to_str().unwrap())
     }
 }
 
@@ -116,17 +116,25 @@ pub fn get_zeus_config() -> PackageManifest {
 }
 
 pub fn olympus() -> String {
-    String::from("http://localhost:3001") + "/config/latest"
+    String::from("https://zeus.bami.lol") + "/config/latest"
+    //String::from("http://localhost:3001") + "/config/latest"
 }
 
 pub fn heimdall() -> String {
-    String::from("http://localhost:3001") + "/link"
+    String::from("https://zeus.bami.lol") + "/link"
+    //String::from("http://localhost:3001") + "/link"
+}
+
+fn _bolt() -> String {
+    let content = fs::read(get_bolt_path()).unwrap_or(vec![]);
+    String::from_utf8(content).unwrap()
 }
 
 pub fn make_authenticated_request() -> reqwest::Client {
     let mut headers = reqwest::header::HeaderMap::new();
+    let bolt = _bolt();
 
-    let mut auth_value = reqwest::header::HeaderValue::from_static("3ZZeAn44S3NVhZugwTAqUunX");
+    let mut auth_value = reqwest::header::HeaderValue::from_str(bolt.as_str()).unwrap();
     auth_value.set_sensitive(true);
     headers.insert(reqwest::header::AUTHORIZATION, auth_value);
 
@@ -136,14 +144,17 @@ pub fn make_authenticated_request() -> reqwest::Client {
         .unwrap()
 }
 
+fn ensure_root_folder() {
+    let root = get_zeus_dir();
+    let _ = fs::create_dir_all(root);
+}
+
 pub fn update_local_file_config(content: &str) {
     println!("");
     println!("--------------------------------");
     println!("-- updating zeus config to disk...");
 
-    let root = get_zeus_dir();
-    let _ = fs::create_dir_all(root);
-
+    ensure_root_folder();
     let write_path = get_zeus_config_path();
     match fs::write(write_path, content) {
         Ok(_) => {}
@@ -157,6 +168,18 @@ pub fn update_local_file_config(content: &str) {
     println!("-- done updating zeus config...");
     println!("===============================");
     //println!("");
+}
+
+fn update_bolt(trident: &str) {
+    ensure_root_folder();
+    let write_path = get_bolt_path();
+    match fs::write(write_path, trident) {
+        Ok(_) => {}
+        Err(_) => {
+            // some retry mechanism...
+            println!("error!!");
+        }
+    }
 }
 
 pub fn update_cloud_file_config(content: &str) {
@@ -179,7 +202,16 @@ pub fn update_cloud_file_config(content: &str) {
         println!("--------------------------------");
         match res {
             Ok(res) => {
-                let content_: LatestConfigResponse = res.json().await.unwrap();
+                let content_: LatestConfigResponse = match res.json().await {
+                    Ok(val) => val,
+                    Err(err) => {
+                        println!("{:?}", err.is_body());
+                        println!("{:?}", err.is_builder());
+                        println!("{:?}", err.is_builder());
+                        println!("{:?}", err.is_request());
+                        panic!("idk");
+                    }
+                };
                 println!("{}", content_.message);
             }
             Err(_) => {
@@ -194,12 +226,18 @@ pub fn update_cloud_file_config(content: &str) {
     })
 }
 
-pub fn link_computer() {
+pub fn link_computer(bolt: &str) {
     smol::block_on(async {
         let mut body = HashMap::new();
         body.insert("fingerprint", get_system_fingerprint());
         body.insert("platform", get_system_platform());
 
+        println!("");
+        println!("--------------------------------");
+        println!("-- updating zeus bolt ...");
+        println!("--------------------------------");
+        println!("");
+        update_bolt(bolt);
         let res = make_authenticated_request()
             .post(heimdall())
             .json(&body)
@@ -215,15 +253,20 @@ pub fn link_computer() {
                     println!("");
                 }
                 _ => {
+                    update_bolt("");
                     println!("an error occured while linking this computer");
                     println!("");
                 }
             },
             Err(_) => {
+                update_bolt("");
                 println!("an error occured while linking this computer");
                 println!("");
             }
         }
+
+        println!("===============================");
+        println!("");
     });
 }
 

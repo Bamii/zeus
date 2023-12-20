@@ -2,5 +2,7 @@ services:
   zeus:
     image: 157918242220.dkr.ecr.us-east-1.amazonaws.com/zeus:latest
     restart: always
+    env_file:
+      - ./env
     ports:
-      - '4000:4000'
+      - "4000:4000"

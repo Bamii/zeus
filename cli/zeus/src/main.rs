@@ -12,8 +12,8 @@ use shared::models::package_manager::{PackageManager, Parse};
 use shared::models::package_manager_repository::PackageManagerRepositoryActions;
 use shared::utils::{
     display_banner, get_and_install_latest_cloud_config, get_system_platform, get_zeus_config,
-    install_package_manager, link_computer, run_command, setup_package_repository,
-    update_cloud_file_config, update_local_file_config, get_zeus_config_string
+    get_zeus_config_string, install_package_manager, link_computer, run_command, get_zeus_dir,
+    setup_package_repository, update_cloud_file_config, update_local_file_config,
 };
 
 ////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ async fn main() {
         .description(env!("CARGO_PKG_DESCRIPTION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .version(env!("CARGO_PKG_VERSION"))
-        .usage("cli [name]")
+        .usage("cli [install/uninstall/upgrade command]")
         .action(default_action_wrapper)
         .command(link_command())
         .command(config_command());
@@ -48,7 +48,7 @@ fn config_command() -> seahorse::Command {
     seahorse::Command::new("config")
         .description("config command")
         .alias("c")
-        .usage("config [upload | download]")
+        .usage("config")
         .command(
             seahorse::Command::new("upload")
                 .description("upload your current config as the latest one")
@@ -59,17 +59,19 @@ fn config_command() -> seahorse::Command {
                 .description("download the latest config")
                 .action(download_config_action),
         )
-        .command(
-            seahorse::Command::new("apply")
-                .description("apply the current config. i.e: install all the packages in the current config.")
-                .action(download_config_action),
-        )
 }
 
-fn link_action(_: &seahorse::Context) {
+fn link_action(c: &seahorse::Context) {
     display_banner();
     println!("linking this computer to zeus...");
-    link_computer();
+
+    if &c.args.len() == &0 {
+        println!("please input your api key...");
+        println!("");
+        return ();
+    }
+
+    link_computer(&c.args[0]);
 }
 
 fn download_config_action(_: &seahorse::Context) {
@@ -79,6 +81,13 @@ fn download_config_action(_: &seahorse::Context) {
     smol::block_on(async {
         let packages_repository = setup_package_repository();
         get_and_install_latest_cloud_config(&packages_repository).await;
+
+        println!("--------------------------");
+        println!("to upload a config, either append zeus to your package install command as in:");
+        println!("> zeus choco install -y zig");
+        println!("or if you already have a config in your zeus root directory: at {}. run the command below", get_zeus_dir());
+        println!("> zeus config upload");
+        println!()
     })
 }
 
@@ -91,10 +100,21 @@ fn upload_config_action(_: &seahorse::Context) {
 }
 
 fn default_action(c: &seahorse::Context) -> Option<String> {
+    if &c.args.len() == &0 {
+        let _ = &c.help();
+        return None;
+    }
+
     let program = &c.args[0];
 
     let packages_repository = setup_package_repository();
-    let package_manager = packages_repository.get(program).unwrap();
+    let package_manager = match packages_repository.get(program) {
+        Some(pm) => pm,
+        None => {
+            let _ = &c.help();
+            return None;
+        }
+    };
 
     let mut zeus_config: PackageManifest = get_zeus_config();
     let mut packages = zeus_config.packages.clone();
@@ -112,6 +132,7 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
                     Err(_) => false,
                 };
 
+            // TODO: FEATURE:: install the package manager if it is not installed.
             if !is_package_manager_installed {
                 println!("{} has not been installed", program);
                 install_package_manager(program.to_string());
@@ -137,7 +158,7 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
 
             match output.status.success() {
                 true => {
-                    update_packages(
+                    process_packages(
                         (String::from(program), active_command.1, active_command.2),
                         &mut packages,
                         &package_manager,
@@ -170,7 +191,7 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
     }
 }
 
-fn update_packages(
+fn process_packages(
     (program, action, matches): (String, String, Vec<String>),
     packages: &mut HashMap<String, PackageDetails>,
     package_manager: &PackageManager,

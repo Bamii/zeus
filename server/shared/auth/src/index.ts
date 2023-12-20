@@ -114,15 +114,14 @@ export const apiKeyAuth = async (
 ) => {
     const authHeader: string | undefined = req.headers['authorization']
     const key = authHeader?.toString().replace('Bearer ', '')
-    //const key = ''
 
-    console.log(key)
     if (!key) {
-        return sendError(res, 'Unauthorized', { status: 401 })
+        return sendError(res, 'plz we need an api key. xx', {
+            status: 401,
+        })
     }
 
     const { result, error } = await verifyKey(key)
-    console.log(result, error)
 
     if (error) {
         console.error(error)
@@ -130,7 +129,9 @@ export const apiKeyAuth = async (
     }
 
     if (!result.valid) {
-        return sendError(res, 'Unauthorized', { status: 401 })
+        return sendError(res, 'you have not linked this minion, sir.', {
+            status: 401,
+        })
     }
 
     const user = await userRepository.getUser({
@@ -140,7 +141,7 @@ export const apiKeyAuth = async (
     if (!user)
         return sendError(
             res,
-            'hmm there seem to have been an error, fair maiden.',
+            'hmm there seems to have been an error, fair maiden.',
             { status: 500 }
         )
 

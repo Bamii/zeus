@@ -17,7 +17,7 @@ import { apiKeyAuth, isDeviceRegistered } from 'auth'
 import fs from 'fs/promises'
 
 const unkey = new Unkey({ rootKey: 'unkey_3ZnyCB4BHxHbJbvfaWSihqRX' })
-const router = Router();
+const router = Router()
 //const cache = Container.get(CacheInstance)
 const userRepository = Container.get(UserRepository)
 const keyRepository = Container.get(KeyRepository)
@@ -41,7 +41,7 @@ router.get(
     '/signup',
     clientAuth({ passthrough: true }),
     (req: any & User, res) => {
-        res.render('signup', { auth: !!req.user });
+        res.render('signup', { auth: !!req.user })
     }
 )
 
@@ -152,7 +152,7 @@ router.get(
             const email = req.user?.email
             const user = await userRepository.getUser({ email })
 
-            res.render('dashboard', { user, auth: true })
+            res.render('dashboard', { download_link: '', user, auth: true })
         } catch (error) {
             console.log(error)
         }
