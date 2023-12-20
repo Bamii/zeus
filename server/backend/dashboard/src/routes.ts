@@ -263,7 +263,7 @@ router.get(
 
             res.sendFile('/config.yaml')
 
-            //await fs.unlink('config.yaml')
+            //await fs.unlink('config.yaml');
             return
         } catch (error) {
             console.log(error)

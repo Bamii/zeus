@@ -31,7 +31,7 @@ jobs:
       - name: determine if to build server
         id: predeploy
         run: |
-          res=$(sed -i 's/\s/\n/g' files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
+          res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
             echo "server=true" >> $GITHUB_OUTPUT
@@ -49,7 +49,7 @@ jobs:
 
       - name: determine if to build cli
         run: |
-          res=$(sed -i 's/\s/\n/g' files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
+          res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
             echo "cli=true" >> $GITHUB_OUTPUT
@@ -140,7 +140,7 @@ jobs:
         if: ${{ steps.read-data.outputs.server }} == true
         id: predeploy
         run: |
-          res=$(awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
+          res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
           if [ $res -eq 1 ]; then 
             cd server && ls 
             docker build -t zeus .
