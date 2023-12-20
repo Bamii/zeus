@@ -158,7 +158,7 @@ router.get(
         }
     }
 )
-// link your laptop
+// link your laptop;;
 router.post(
     '/link',
     apiKeyAuth,

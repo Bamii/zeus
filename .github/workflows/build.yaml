@@ -26,7 +26,7 @@ jobs:
         run: cat $HOME/files.txt
 
       - name: determine if to build server
-        id: predeploy
+        id: predeploy-server
         run: |
           res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
           if [ $res -eq 1 ]; then 
@@ -37,7 +37,7 @@ jobs:
           fi
 
       - name: Set server deploy data
-        if: ${{ steps.predeploy.outputs.cli }} == true
+        if: ${{ steps.predeploy-server.outputs.server }} == true
         uses: edumserrano/share-jobs-data@v1
         with:
           command: set-data
@@ -45,6 +45,7 @@ jobs:
             server: true
 
       - name: determine if to build cli
+        id: predeploy-cli
         run: |
           res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
@@ -57,7 +58,7 @@ jobs:
           fi
 
       - name: Set cli deploy data
-        if: ${{ steps.predeploy.outputs.cli }} == true
+        if: ${{ steps.predeploy-cli.outputs.cli }} == true
         uses: edumserrano/share-jobs-data@v1
         with:
           command: set-data
@@ -81,6 +82,9 @@ jobs:
             label: macos
             archive: zip
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Read data
         id: read-data # must have an id so that you can access the output from this step which contains the shared data
         uses: edumserrano/share-jobs-data@v1
@@ -118,6 +122,9 @@ jobs:
     needs: predeploy
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Read data
         id: read-data # must have an id so that you can access the output from this step which contains the shared data
         uses: edumserrano/share-jobs-data@v1
@@ -141,7 +148,7 @@ jobs:
         if: ${{ steps.read-data.outputs.server }} == true
         id: predeploy
         run: |
-          ls 
+          cd server && ls 
           docker build -t zeus .
           docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
           docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
