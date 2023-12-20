@@ -142,9 +142,6 @@ jobs:
         id: predeploy
         run: |
           ls 
-          docker build -t zeus .
-          docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
-          docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
 
       - name: Deploy to Staging server
         if: ${{ steps.read-data.outputs.server }} == true
