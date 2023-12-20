@@ -25,9 +25,6 @@ jobs:
       - name: Show files changed
         run: cat $HOME/files.txt
 
-      - name: Show which dirs changed.
-        run: sed 's/\s/\n/g' files.txt | awk '{ print $1 }' FS=/ $HOME/files.txt
-
       - name: determine if to build server
         id: predeploy
         run: |
@@ -51,7 +48,7 @@ jobs:
         run: |
           res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
           if [ $res -eq 1 ]; then 
-            cd server && ls 
+            cd cli && ls 
             echo "cli=true" >> $GITHUB_OUTPUT
           else
             cd cli && ls 
@@ -144,7 +141,7 @@ jobs:
         if: ${{ steps.read-data.outputs.server }} == true
         id: predeploy
         run: |
-          cd server && ls 
+          ls 
           docker build -t zeus .
           docker tag zeus ${{ secrets.DOCKER_REPOSITORY }}:latest
           docker push ${{ secrets.DOCKER_REPOSITORY }}:latest

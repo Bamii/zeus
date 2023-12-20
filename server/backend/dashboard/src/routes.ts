@@ -257,7 +257,7 @@ router.get(
             const config_blob: Blob = await storage.download(filename)
             const content = await config_blob.arrayBuffer()
 
-            //console.log(hash256(content));
+            //console.log(hash256(content))
             console.log(config_blob)
             await fs.writeFile('/config.yaml', new DataView(content))
 
