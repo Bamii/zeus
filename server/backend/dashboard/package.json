@@ -6,7 +6,7 @@
     "types": "src/index.ts",
     "scripts": {
         "clean": "rm -rf dist tsconfig.tsbuildinfo",
-        "start:prod": "PORT=3000 ts-node src/index.ts",
+        "start:prod": "ts-node src/index.ts",
         "start:dev": "nodemon ./src/index.ts",
         "build": "tsc --incremental"
     },
