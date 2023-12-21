@@ -145,6 +145,9 @@ jobs:
         with:
           command: read-data-current-workflow
 
+      - name: ish..
+        run: echo ${{ steps.read-data.outputs.server }}
+
       - name: Configure AWS credentials
         if: ${{ steps.read-data.outputs.server }} == true
         uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
