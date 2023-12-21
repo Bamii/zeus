@@ -110,7 +110,10 @@ jobs:
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
       - name: Show files changed
-        run: ls cli/target/${{ matrix.target }}
+        run: |
+          ls cli/target/${{ matrix.target }}
+          ls cli/
+          ls cli/target
 
       - uses: jakejarvis/s3-sync-action@master
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
