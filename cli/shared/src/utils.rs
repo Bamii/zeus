@@ -152,7 +152,7 @@ fn ensure_root_folder() {
 pub fn update_local_file_config(content: &str) {
     println!("");
     println!("--------------------------------");
-    println!("-- updating zeus config to disk...");
+    println!("-- updating zeus config to disk... ");
 
     ensure_root_folder();
     let write_path = get_zeus_config_path();
