@@ -84,6 +84,7 @@ jobs:
           command: read-data-current-workflow
 
       - name: Compile and release
+        id: compile-zeus
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
@@ -96,7 +97,17 @@ jobs:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
+      - name: Upload artifact
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Binary
+          path: |
+            ${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}
+            ${{ steps.compile-zeus.outputs.BUILT_CHECKSUM }}
+
       - name: Compile and release
+        id: compile-zeusd
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
@@ -109,31 +120,43 @@ jobs:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
 
+      - name: Upload artifact
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Binary
+          path: |
+            ${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}
+            ${{ steps.compile-zeusd.outputs.BUILT_CHECKSUM }}
+
       - name: Show files changed
         run: |
           ls -a cli/
           ls -a cli/zeus/target/${{ matrix.target }}/release
           ls -a cli/zeusd/target/${{ matrix.target }}/release
 
-      - uses: jakejarvis/s3-sync-action@master
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
+      - name: Release...
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: cli/zeus/target/${{ matrix.target }}/release/zeus.*
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "zeus Build"
+          files: |
+            ${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}
+            ${{ steps.compile-zeusd.outputs.BUILT_CHECKSUM }}
+            ${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}
+            ${{ steps.compile-zeus.outputs.BUILT_CHECKSUM }}
 
-      - uses: jakejarvis/s3-sync-action@master
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: cli/zeusd/target/${{ matrix.target }}/release/zeusd.*
+      #- uses: jakejarvis/s3-sync-action@master
+      #  if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
+      #with:
+      #  args: --acl public-read --follow-symlinks --delete
+      #env:
+      #  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      #AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #SOURCE_DIR: cli/zeus/target/${{ matrix.target }}/release/zeus.*
 
   deploy_server:
     needs: predeploy
