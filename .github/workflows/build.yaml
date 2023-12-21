@@ -91,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           SRC_DIR: cli/zeus
-          ARCHIVE_NAME: zeus.${{ matrix.label }}.${{ matrix.archive }}
+          ARCHIVE_NAME: zeus.${{ matrix.label }}
           MINIFY: true
           TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
           RUSTTARGET: ${{ matrix.target }}
@@ -113,30 +113,23 @@ jobs:
           ARCHIVE_TYPES: ${{ matrix.archive }}
           UPLOAD_MODE: none
 
-      #- name: Upload artifact
-      #  if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
-      #uses: actions/upload-artifact@v3
-      #with:
-      #  name: Binary
-      #path: |
-      #  ${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}
-      #            ${{ steps.compile-zeusd.outputs.BUILT_CHECKSUM }}
-      #            ${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}
-      #            ${{ steps.compile-zeus.outputs.BUILT_CHECKSUM }}
-
       - uses: hkusu/s3-upload-action@v2
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-bucket: ${{ secrets.AWS_S3_BUCKET }}
+          destination-dir: /
           aws-region: us-east-1
           file-path: "${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}"
 
       - uses: hkusu/s3-upload-action@v2
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-bucket: ${{ secrets.AWS_S3_BUCKET }}
+          destination-dir: /
           aws-region: us-east-1
           file-path: "${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}"
 
