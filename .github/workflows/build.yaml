@@ -33,6 +33,7 @@ jobs:
             cd server && ls 
             echo "server=true" >> $GITHUB_OUTPUT
           else
+            echo "server=false" >> $GITHUB_OUTPUT
             echo "no deploy this time"
           fi
 
@@ -42,7 +43,7 @@ jobs:
         with:
           command: set-data
           data: |
-            server: true
+            server: ${{ steps.predeploy-server.outputs.server }}
 
       - name: determine if to build cli
         id: predeploy-cli
@@ -52,18 +53,16 @@ jobs:
             cd cli && ls 
             echo "cli=true" >> $GITHUB_OUTPUT
           else
-            cd cli && ls 
-            
+            echo "cli=false" >> $GITHUB_OUTPUT
             echo "no deploy this time"
           fi
 
       - name: Set cli deploy data
-        if: ${{ steps.predeploy-cli.outputs.cli }} == true
         uses: edumserrano/share-jobs-data@v1
         with:
           command: set-data
           data: |
-            cli: true
+            cli: ${{ steps.predeploy-cli.outputs.cli }}
 
   deploy_cli:
     needs: predeploy
@@ -97,7 +96,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          SRC_DIR: cli
+          SRC_DIR: cli/zeus
+          ARCHIVE_NAME: ${{ matrix.label }}.${{ matrix.archive }}
+          MINIFY: true
+          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+
+      - name: Compile and release
+        if: ${{ steps.read-data.outputs.cli }} == true
+        uses: rust-build/rust-build.action@v1.4.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          SRC_DIR: cli/zeusd
           ARCHIVE_NAME: ${{ matrix.label }}.${{ matrix.archive }}
           MINIFY: true
           TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
