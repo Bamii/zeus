@@ -91,7 +91,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           SRC_DIR: cli/zeus
-          ARCHIVE_NAME: ${{ matrix.label }}.${{ matrix.archive }}
+          ARCHIVE_NAME: zeus.${{ matrix.label }}.${{ matrix.archive }}
           MINIFY: true
           TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
           RUSTTARGET: ${{ matrix.target }}
@@ -114,7 +114,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           SRC_DIR: cli/zeusd
-          ARCHIVE_NAME: ${{ matrix.label }}.${{ matrix.archive }}
+          ARCHIVE_NAME: zeusd.${{ matrix.label }}.${{ matrix.archive }}
           MINIFY: true
           TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
           RUSTTARGET: ${{ matrix.target }}
