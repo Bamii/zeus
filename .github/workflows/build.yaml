@@ -112,7 +112,8 @@ jobs:
       - name: Show files changed
         run: |
           ls cli/
-          ls cli/target
+          ls cli/zeus/target
+          ls cli/zeusd/target
 
       - uses: jakejarvis/s3-sync-action@master
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
@@ -122,7 +123,7 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: cli/target/${{ matrix.target }}/release/zeus.${{ matrix.archive }}
+          SOURCE_DIR: cli/zeus/target/${{ matrix.target }}/release/zeus.${{ matrix.archive }}
 
       - uses: jakejarvis/s3-sync-action@master
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
@@ -132,7 +133,7 @@ jobs:
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: cli/target/${{ matrix.target }}/release/zeusd.${{ matrix.archive }} # optional: defaults to entire repository
+          SOURCE_DIR: cli/zeusd/target/${{ matrix.target }}/release/zeusd.${{ matrix.archive }} # optional: defaults to entire repository
 
   deploy_server:
     needs: predeploy
