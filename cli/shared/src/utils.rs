@@ -176,7 +176,7 @@ fn update_bolt(trident: &str) {
     match fs::write(write_path, trident) {
         Ok(_) => {}
         Err(_) => {
-            // some retry mechanism.
+            // some retry mechanism
             println!("error!!");
         }
     }

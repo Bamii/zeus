@@ -112,8 +112,8 @@ jobs:
       - name: Show files changed
         run: |
           ls cli/
-          ls cli/zeus/target
-          ls cli/zeusd/target
+          ls cli/zeus/target/${{ matrix.target }}/release
+          ls cli/zeusd/target/${{ matrix.target }}/release
 
       - uses: jakejarvis/s3-sync-action@master
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
