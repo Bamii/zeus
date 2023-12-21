@@ -111,7 +111,6 @@ jobs:
 
       - name: Show files changed
         run: |
-          ls cli/target/${{ matrix.target }}
           ls cli/
           ls cli/target
 
