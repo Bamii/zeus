@@ -129,6 +129,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-bucket: ${{ secrets.AWS_BUCKET }}
+          aws-region: us-east-1
           file-path: "${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}"
 
       - uses: hkusu/s3-upload-action@v2
@@ -136,6 +137,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-bucket: ${{ secrets.AWS_BUCKET }}
+          aws-region: us-east-1
           file-path: "${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}"
 
   deploy_server:
