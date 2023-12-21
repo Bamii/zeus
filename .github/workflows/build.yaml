@@ -37,14 +37,6 @@ jobs:
             echo "no deploy this time"
           fi
 
-      - name: Set server deploy data
-        if: ${{ steps.predeploy-server.outputs.server }} == true
-        uses: edumserrano/share-jobs-data@v1
-        with:
-          command: set-data
-          data: |
-            server: ${{ steps.predeploy-server.outputs.server }}
-
       - name: determine if to build cli
         id: predeploy-cli
         run: |
@@ -63,6 +55,7 @@ jobs:
           command: set-data
           data: |
             cli: ${{ steps.predeploy-cli.outputs.cli }}
+            server: ${{ steps.predeploy-server.outputs.server }}
 
   deploy_cli:
     needs: predeploy
@@ -76,10 +69,10 @@ jobs:
             archive: zip
           - target: x86_64-unknown-linux-musl
             label: linux
-            archive: tar.gz tar.xz tar.zst
-          - target: x86_64-apple-darwin
-            label: macos
-            archive: zip
+            archive: tar.gz
+          #- target: x86_64-apple-darwin
+          #  label: macos
+          #  archive: zip
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,16 +112,25 @@ jobs:
       - name: Show files changed
         run: ls
 
-      #- uses: jakejarvis/s3-sync-action@master
-      #  if: ${{ steps.predeploy.outputs.cli }} == true
-      #with:
-      #  args: --acl public-read --follow-symlinks --delete
-      #        env:
-      #  AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-      #          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #          AWS_REGION: "us-west-1" # optional: defaults to us-east-1
-      #          SOURCE_DIR: "public" # optional: defaults to entire repository
+      - uses: jakejarvis/s3-sync-action@master
+        if: ${{ steps.predeploy.outputs.cli }} == true
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: target/${{ matrix.target }}/release/zeus.${{ matrix.archive }}
+
+      - uses: jakejarvis/s3-sync-action@master
+        if: ${{ steps.predeploy.outputs.cli }} == true
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: target/${{ matrix.target }}/release/zeusd.${{ matrix.archive }} # optional: defaults to entire repository
 
   deploy_server:
     needs: predeploy
