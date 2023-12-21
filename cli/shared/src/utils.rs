@@ -159,7 +159,7 @@ pub fn update_local_file_config(content: &str) {
     match fs::write(write_path, content) {
         Ok(_) => {}
         Err(_) => {
-            // some retry mechanism
+            // some retry mechanism.
             println!("error!!");
         }
     }
