@@ -102,8 +102,10 @@ pub fn get_zeus_dir() -> String {
 }
 
 pub fn get_zeus_config_string() -> String {
+    ensure_root_folder();
+
     let content = fs::read(get_zeus_config_path()).unwrap_or(vec![]);
-    String::from_utf8(content).unwrap()
+    String::from_utf8(content).unwrap_or("".to_string())
 }
 
 pub fn get_zeus_config() -> PackageManifest {
@@ -126,15 +128,15 @@ pub fn heimdall() -> String {
 }
 
 fn _bolt() -> String {
+    ensure_root_folder();
     let content = fs::read(get_bolt_path()).unwrap_or(vec![]);
-    String::from_utf8(content).unwrap()
+    String::from_utf8(content).unwrap_or("".to_string())
 }
 
 pub fn make_authenticated_request() -> reqwest::Client {
     let mut headers = reqwest::header::HeaderMap::new();
-    let bolt = _bolt();
 
-    let mut auth_value = reqwest::header::HeaderValue::from_str(bolt.as_str()).unwrap();
+    let mut auth_value = reqwest::header::HeaderValue::from_str(_bolt().as_str()).unwrap();
     auth_value.set_sensitive(true);
     headers.insert(reqwest::header::AUTHORIZATION, auth_value);
 
@@ -204,11 +206,7 @@ pub fn update_cloud_file_config(content: &str) {
             Ok(res) => {
                 let content_: LatestConfigResponse = match res.json().await {
                     Ok(val) => val,
-                    Err(err) => {
-                        println!("{:?}", err.is_body());
-                        println!("{:?}", err.is_builder());
-                        println!("{:?}", err.is_builder());
-                        println!("{:?}", err.is_request());
+                    Err(_) => {
                         panic!("idk");
                     }
                 };
