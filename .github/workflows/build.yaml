@@ -117,7 +117,7 @@ jobs:
         run: |
           mkdir -p cli/out
           cd output
-          zip cli/out/zeus.${{ matrix.label }}.zip zeus*
+          zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
