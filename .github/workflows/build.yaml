@@ -115,8 +115,8 @@ jobs:
 
       - name: zip zeus.
         run: |
-          mkdir -p output/packages
-          zip output/packed/zeus.${{ matrix.label }}.zip output/zeus*
+          mkdir -p cli/out
+          zip cli/out/zeus.${{ matrix.label }}.zip output/zeus*
 
       - uses: hkusu/s3-upload-action@v2
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
@@ -127,7 +127,7 @@ jobs:
           public: true
           destination-dir: /
           aws-region: us-east-1
-          file-path: output/packed/*
+          file-path: cli/out/*
 
       # - uses: hkusu/s3-upload-action@v2
       #   if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
