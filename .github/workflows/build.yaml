@@ -115,7 +115,7 @@ jobs:
 
       - name: zip zeus.
         run: |
-          mkdir output/packages -r
+          mkdir -p output/packages
           zip output/packed/zeus.${{ matrix.label }}.zip output/zeus*
 
       - uses: hkusu/s3-upload-action@v2
