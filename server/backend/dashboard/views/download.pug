@@ -6,28 +6,29 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
     h1 zeus
 
   div(class="flex gap-10 py-6")
-    div(class="max-w-[20rem] m-5 mx-auto")
-      div(class="p-3 rounded relative") 
-        div(class="before:h-[1rem] before:w-full before:bottom-0 before:block before:mt-auto before:absolute before:-inset-1 before:-skew-y-3 before:bg-[#E07A5F]")
-          div quick setup::
-
-      div download the zip below depending on your platform.
-      ul(class="lg:w-[20rem] mt-5 flex-wrap whitespace-normal text-left mx-auto space-y-[8px] list-[roman]") 
-        li 
-          a(href="#{linux_download_link}") linux systems
-        li
-          a(href="#{windows_download_link}") windows systems
+    div(class="max-w-[40rem] flex flex-col gap-[36px] m-5 mx-auto")
+      div.mt-8 download the zip below depending on your platform.
+        div(class="lg:w-[20rem] gap-[8px] grid grid-cols-2 mt-2 flex-wrap whitespace-normal text-left _mx-auto list-[roman]") 
+          a(href=linux_download_link) 
+            div(class="rounded-lg w-max px-3 py-2 border border-black hover:bg-black hover:text-white") linux systems
+          a(href=windows_download_link) 
+            div(class="rounded-lg w-max px-3 py-2 border border-black hover:bg-black hover:text-white") windows systems
            
       div 
         div extract the file you downloaded and copy zeus and zeusd into a folder that's in your system's PATH.
-        div don't know what i mean? click on the links below depending on your platform.
+        div(class="text-[14px] mx-3 p-2 rounded-lg") don't know what i mean? click on the links below depending on your platform.
           li 
-            a(href="#{linux_download_link}") linux systems
+            a(href="https://www.computerhope.com/issues/ch001647.htm") linux systems
           li
-            a(href="#{windows_download_link}") windows systems 
+            a(href="https://www.computerhope.com/issues/ch000549.htm") windows systems 
 
       div 
         div voila! you can now run zeus from anywhere.
+
+      div 
+        div start the zeusd service in the background using
+          pre > zeusd &      // linux
+          pre > start /b zeusd   // windows cmd (NOT powershell)
 
 include includes/footer         
 

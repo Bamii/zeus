@@ -58,6 +58,40 @@ router.get(
     }
 )
 
+router.get(
+    '/download',
+    clientAuth({ passthrough: true }),
+    async (req: any, res: any) => {
+        try {
+            res.render('download', {
+                windows_download_link:
+                    'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.windows.zip',
+                linux_download_link:
+                    'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.linux.zip',
+                auth: !!req.user,
+            })
+        } catch (e: any) {}
+    }
+)
+
+router.get(
+    '/dashboard',
+    clientAuth({ redirect: true }),
+    async (req: any & User, res) => {
+        try {
+            const email = req.user?.email
+            const user = await userRepository.getUser({ email })
+
+            res.render('dashboard', {
+                user,
+                auth: true,
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+)
+
 router.post('/login', validator.login, async (req: any & User, res) => {
     let user = await userRepository.getUser({ email: req.body.email })
 
@@ -144,35 +178,6 @@ router.post('/register', validator.register, async (_req, res, next) => {
     }
 })
 
-router.get('/download', async (req: any, res: any) => {
-    try {
-        res.render('download', {
-            windows_download_link:
-                'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.windows.zip',
-            linux_download_link:
-                'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.linux.zip',
-            auth: !!req.user,
-        })
-    } catch (e: any) {}
-})
-
-router.get(
-    '/dashboard',
-    clientAuth({ redirect: true }),
-    async (req: any & User, res) => {
-        try {
-            const email = req.user?.email
-            const user = await userRepository.getUser({ email })
-
-            res.render('dashboard', {
-                user,
-                auth: true,
-            })
-        } catch (error) {
-            console.log(error)
-        }
-    }
-)
 // link your laptop;;
 router.post(
     '/link',

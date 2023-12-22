@@ -15,7 +15,7 @@ main(class="text-center my-5 container max-w-[50rem] mx-auto max-lg:bg-[#FFEBC2]
         li register for an account.
         li copy the api key on your dashbaord.
         li.whitespace-normal 
-          a(href="/download") download and install zeus.
+          a(href="/download" class="underline underline-offset-[3px]") download and install zeus.
         li.whitespace-normal link your computer (minion) to zeus. 
           pre > zeus link api-key
         li to install a package, prepend zeus to your install command.
@@ -24,6 +24,10 @@ main(class="text-center my-5 container max-w-[50rem] mx-auto max-lg:bg-[#FFEBC2]
     div.space-y-2 
       div(class="text-[32px] font-[kalnia]") which package managers are supported?
       div(class="") scoop, chocolatey, rpm, apt-get, cargo, pacman, homebrew, snap
+
+    div.space-y-2 
+      div(class="text-[32px] font-[kalnia]") do i need to manually install the package managers on the target systems?
+      div yes, at this time you need to manually install the package managers on the systems you want to link to zeus. but that would not be needed in the next iteration
 
     div.space-y-2 
       div(class="text-[32px] font-[kalnia]") how many minions can i link?

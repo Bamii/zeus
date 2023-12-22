@@ -3,8 +3,8 @@ include includes/header
 main(class="text-center my-5 container max-w-[50rem] mx-auto")
   header(class="flex items-center justify-center mt-[7rem] mb-[3rem] text-[64px] font-[kalnia]")
     h1 zeus
-                
-  #notification 
+
+  #notification.mb-2 
 
   div(class="gap-y-[42px] flex flex-col")
     form(hx-post="/register" hx-target="#notification" class="w-full max-w-[20rem] mx-auto flex flex-col gap-y-5 text-left")     
@@ -20,7 +20,9 @@ main(class="text-center my-5 container max-w-[50rem] mx-auto")
         label(class="" for="pasword") password
         input(class="border border-[#ddd] w-full py-2 px-3" name="password" type="password" required id="password")
 
-      button(class="border bg-[#ffe6b675] hover:bg-[#222] hover:text-white w-full py-2 px-3 mt-10" name="submit" type="submit") lets go!
+      button(class="border flex items-center justify-center gap-[8px] bg-[#ffe6b675] hover:bg-[#222] hover:text-white w-full py-2 px-3 mt-10" type="submit" hx-indicator="#indicator") 
+        span login
+          img(class="htmx-indicator h-5 w-5 inline animation-pulse" src="/public/bolt.svg" id="indicator")
 
 include includes/footer         
 
