@@ -106,23 +106,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           SRC_DIR: cli/zeusd
-          ARCHIVE_NAME: zeusd.${{ matrix.label }}.${{ matrix.archive }}
+          ARCHIVE_NAME: zeusd.${{ matrix.label }}
           MINIFY: true
           TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
           UPLOAD_MODE: none
 
-      - uses: hkusu/s3-upload-action@v2
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-bucket: ${{ secrets.AWS_S3_BUCKET }}
-          public: true
-          destination-dir: /
-          aws-region: us-east-1
-          file-path: "${{ steps.compile-zeusd.outputs.BUILT_ARCHIVE }}"
+      - name: zip zeus.
+        run: |
+          mkdir output/packages -r
+          zip output/packed/zeus.${{ matrix.label }}.zip output/zeus*
 
       - uses: hkusu/s3-upload-action@v2
         if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
@@ -133,56 +127,27 @@ jobs:
           public: true
           destination-dir: /
           aws-region: us-east-1
-          file-path: "${{ steps.compile-zeus.outputs.BUILT_ARCHIVE }}"
+          file-path: output/packed/*
 
-      - name: Set cli deploy data
-        uses: edumserrano/share-jobs-data@v1
-        with:
-          command: set-data
-          data: |
-            cli: ${{ steps.read-data.outputs.cli }}
-            zeus_version: patch
-            zeusd_version: patch
+      # - uses: hkusu/s3-upload-action@v2
+      #   if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-bucket: ${{ secrets.AWS_S3_BUCKET }}
+      #     public: true
+      #     destination-dir: /
+      #     aws-region: us-east-1
+      #     file-path: "${{ steps.compile-zeus.outputs.CHECKSUM }}"
 
-  # publish_crates:
-  #   needs: deploy_cli
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-
-  #     - name: Read data
-  #       id: read-data # must have an id so that you can access the output from this step which contains the shared data
-  #       uses: edumserrano/share-jobs-data@v1
-  #       with:
-  #         command: read-data-current-workflow
-
-  #     - uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         override: true
-
-  #     - name: Crates publish
-  #       uses: kaleidawave/crates-release-gh-action@main
-  #       if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
-  #       id: release
-  #       with:
-  #         crates-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-  #         version: |
-  #           {
-  #             "zeus": "${{ steps.read-data.outputs.zeus_version }}",
-  #             "zeusd": "${{ steps.read-data.outputs.zeusd_version }}"
-  #           }
-
-  #     - name: Push updated Cargo.toml
-  #       if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
-  #       run: |
-  #         echo '${{ steps.release.outputs.new-versions }}' | jq -r '.[]' | while read -r update; do
-  #           git tag "release/$update"
-  #         done
-  #         git add .
-  #         git commit -m "Release: ${{ steps.release.outputs.new-versions-description }}"
-  #         git push --tags origin main
+      # - name: Set cli deploy data
+      #   uses: edumserrano/share-jobs-data@v1
+      #   with:
+      #     command: set-data
+      #     data: |
+      #       cli: ${{ steps.read-data.outputs.cli }}
+      #       zeus_version: patch
+      #       zeusd_version: patch
 
   deploy_server:
     needs: predeploy
