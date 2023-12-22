@@ -25,7 +25,7 @@ pub fn run(packages: &PackageManagerRepository) {
     run_on_cron(packages);
 }
 
-// The function to be executed..
+// The function to be executed.
 pub fn run_on_cron(packages: &PackageManagerRepository) {
     smol::block_on(async {
         println!("Executed function");
