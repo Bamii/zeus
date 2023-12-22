@@ -6,9 +6,9 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
     h1 zeus
 
   div(class="flex gap-10 py-6")
-    div(class="max-w-[40rem] flex flex-col gap-[36px] m-5 mx-auto")
+    div(class="w-full md:max-w-[40rem] flex flex-col gap-[36px] m-5 mx-auto")
       div.mt-8 download the zip below depending on your platform.
-        div(class="lg:w-[20rem] gap-[8px] grid grid-cols-2 mt-2 flex-wrap whitespace-normal text-left _mx-auto list-[roman]") 
+        div(class="lg:w-[20rem] gap-[8px] grid md:grid-cols-2 mt-2 flex-wrap whitespace-normal text-left _mx-auto list-[roman]") 
           a(href=linux_download_link) 
             div(class="rounded-lg w-max px-3 py-2 border border-black hover:bg-black hover:text-white") linux systems
           a(href=windows_download_link) 
@@ -27,8 +27,8 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
 
       div 
         div start the zeusd service in the background using
-          pre > zeusd &      // linux
-          pre > start /b zeusd   // windows cmd (NOT powershell)
+          pre.whitespace-normal > zeusd &      // linux
+          pre.whitespace-normal > start /b zeusd   // windows cmd (NOT powershell)
 
 include includes/footer         
 
