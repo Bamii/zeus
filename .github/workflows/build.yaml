@@ -114,6 +114,7 @@ jobs:
           UPLOAD_MODE: none
 
       - name: zip zeus.
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         run: |
           mkdir -p cli/out
           cd output
