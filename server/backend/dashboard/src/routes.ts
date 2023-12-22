@@ -198,7 +198,7 @@ router.post(
             const devices = await devicesRepository.getUsersDevices(
                 parseInt(req.user.id)
             )
-            if (devices.length > 3) {
+            if (devices.length > 5) {
                 return sendError(
                     res,
                     'you already have 3 devices mate. please buy a subscription. saanu mi'
