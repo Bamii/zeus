@@ -140,7 +140,7 @@ router.post('/register', validator.register, async (_req, res, next) => {
         console.log(error)
         const content = pug.compileFile('views/includes/notification.pug')
         return res.send(content({ text: 'an error occured' }))
-        //return sendError(res, 'An Error Occured')
+        //return sendError(res, 'An Error Occured.')
     }
 })
 

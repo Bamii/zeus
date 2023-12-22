@@ -29,7 +29,7 @@ jobs:
         id: predeploy-server
         run: |
           res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep server | wc -l)
-          if [ $res -eq 1 ]; then 
+          if [ $res -gt 0 ]; then 
             cd server && ls 
             echo "server=true" >> $GITHUB_OUTPUT
           else
@@ -41,7 +41,7 @@ jobs:
         id: predeploy-cli
         run: |
           res=$(sed -i 's/\s/\n/g' $HOME/files.txt && awk '{ print $1 }' FS=/ $HOME/files.txt | grep cli | wc -l)
-          if [ $res -eq 1 ]; then 
+          if [ $res -gt 0 ]; then 
             cd cli && ls 
             echo "cli=true" >> $GITHUB_OUTPUT
           else
