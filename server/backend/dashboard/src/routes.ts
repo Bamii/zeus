@@ -144,6 +144,18 @@ router.post('/register', validator.register, async (_req, res, next) => {
     }
 })
 
+router.get('/download', async (req: any, res: any) => {
+    try {
+        res.render('download', {
+            windows_download_link:
+                'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.windows.zip',
+            linux_download_link:
+                'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.linux.zip',
+            auth: !!req.user,
+        })
+    } catch (e: any) {}
+})
+
 router.get(
     '/dashboard',
     clientAuth({ redirect: true }),
@@ -152,7 +164,10 @@ router.get(
             const email = req.user?.email
             const user = await userRepository.getUser({ email })
 
-            res.render('dashboard', { download_link: '', user, auth: true })
+            res.render('dashboard', {
+                user,
+                auth: true,
+            })
         } catch (error) {
             console.log(error)
         }
