@@ -35,14 +35,14 @@ pub fn uninstall_command() -> clap::Command {
 fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    run_command(&arr[..].to_vec());
+    let _  = run_command(&[arr[0].clone(), "install".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 
 fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    run_command(&arr[..].to_vec());
+    let _  = run_command(&[arr[0].clone(), "uninstall".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 

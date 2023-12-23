@@ -28,7 +28,7 @@ use crate::package_managers::default_command_only::default as default_command_on
 use crate::package_managers::default_flag_only::default as default_flag_only;
 use crate::package_managers::pm::default as pacman;
 use crate::package_managers::rpm::default as rpm;
-use crate::package_managers::scoop::default as scoop;
+//use crate::package_managers::scoop::default as scoop;
 
 #[derive(Debug, Deserialize)]
 pub struct LatestConfigResponse {
@@ -48,7 +48,7 @@ pub fn create_package_repository() -> PackageManagerRepository {
 pub fn setup_package_repository() -> PackageManagerRepository {
     let mut packages_repository = create_package_repository();
 
-    packages_repository.register("scoop", scoop());
+    //packages_repository.register("scoop", scoop());
     packages_repository.register("rpm", rpm());
     packages_repository.register("pacman", pacman());
     packages_repository.register("apt", apt());
@@ -397,7 +397,7 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
                 &"old" => {
                     for package in &packages {
                         let pkg = package.clone();
-                        let _ = (vendor_repository.uninstall)(&vec![installation.get(0).unwrap().vendor.clone(),]).unwrap();
+                        let _ = (vendor_repository.uninstall)(&vec![installation.get(0).unwrap().vendor.clone(), pkg]).unwrap();
                     }
                 }
                 _ => panic!("never will happen"),
