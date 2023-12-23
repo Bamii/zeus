@@ -14,6 +14,7 @@ use std::fs;
 use std::path;
 use std::process;
 use std::u8;
+use dirs;
 
 use crate::models::package::{PackageDetailsLocal, PackageManifest};
 use crate::models::package_manager_repository::{
@@ -94,16 +95,13 @@ pub fn get_bolt_path() -> String {
 }
 
 pub fn get_zeus_dir() -> String {
-    if cfg!(target_os = "windows") {
-        String::from(path::PathBuf::from(r"C:\.zeus").as_path().to_str().unwrap())
-    } else {
-        String::from(path::PathBuf::from("/etc/zeus").as_path().to_str().unwrap())
-    }
+    let mut zeus_dir = path::PathBuf::from(dirs::home_dir().unwrap());
+        zeus_dir.push(".zeus");
+
+    String::from(zeus_dir.as_path().to_str().unwrap_or(""))
 }
 
 pub fn get_zeus_config_string() -> String {
-    ensure_root_folder();
-
     let content = fs::read(get_zeus_config_path()).unwrap_or(vec![]);
     String::from_utf8(content).unwrap_or("".to_string())
 }
@@ -128,7 +126,6 @@ pub fn heimdall() -> String {
 }
 
 fn _bolt() -> String {
-    ensure_root_folder();
     let content = fs::read(get_bolt_path()).unwrap_or(vec![]);
     String::from_utf8(content).unwrap_or("".to_string())
 }
@@ -144,6 +141,29 @@ pub fn make_authenticated_request() -> reqwest::Client {
         .default_headers(headers)
         .build()
         .unwrap()
+}
+
+pub fn ensure_zeus_files() {
+    ensure_root_folder();
+    let _ = get_zeus_dir();
+
+    let bolt = get_bolt_path();
+    let bolt_location = path::Path::new(&bolt);
+    match bolt_location.try_exists() {
+        Ok(true) => {}
+        _ => {
+            let _ = fs::write(bolt_location, "");
+        }
+    }
+
+    let config = get_zeus_config_path();
+    let config_location = path::Path::new(&config);
+    match config_location.try_exists() {
+        Ok(true) => {}
+        _ => {
+            let _ = fs::write(config_location, "");
+        }
+    };
 }
 
 fn ensure_root_folder() {

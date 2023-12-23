@@ -11,9 +11,9 @@ use shared::models::package::{PackageDetails, PackageManifest};
 use shared::models::package_manager::{PackageManager, Parse};
 use shared::models::package_manager_repository::PackageManagerRepositoryActions;
 use shared::utils::{
-    display_banner, get_and_install_latest_cloud_config, get_system_platform, get_zeus_config,
-    get_zeus_config_string, install_package_manager, link_computer, run_command, get_zeus_dir,
-    setup_package_repository, update_cloud_file_config, update_local_file_config,
+    display_banner, ensure_zeus_files, get_and_install_latest_cloud_config, get_system_platform,
+    get_zeus_config, get_zeus_config_string, get_zeus_dir, install_package_manager, link_computer,
+    run_command, setup_package_repository, update_cloud_file_config, update_local_file_config,
 };
 
 ////////////////////////////////////////////////////////
@@ -29,6 +29,7 @@ async fn main() {
         .command(link_command())
         .command(config_command());
 
+    ensure_zeus_files();
     app.run(args);
 }
 

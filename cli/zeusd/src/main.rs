@@ -4,12 +4,14 @@ extern crate cron_job;
 use cron_job::CronJob;
 use shared::models::package_manager_repository::PackageManagerRepository;
 use shared::utils::{
-    display_banner, get_and_install_latest_cloud_config, setup_package_repository,
+    display_banner, get_and_install_latest_cloud_config, 
+    setup_package_repository, ensure_zeus_files
 };
 
 #[tokio::main]
 async fn main() {
     display_banner();
+    ensure_zeus_files();
     start_cron();
 }
 
@@ -17,7 +19,7 @@ fn start_cron() {
     let mut cron = CronJob::default();
     let packages_repository: PackageManagerRepository = setup_package_repository();
 
-    cron.new_job("*/10 * * * * *", move || run(&packages_repository));
+    cron.new_job("*/60 * * * * *", move || run(&packages_repository));
     cron.start();
 }
 
