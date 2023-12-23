@@ -26,8 +26,25 @@ pub fn uninstall_command() -> clap::Command {
         .subcommand(clap::Command::new("remove").args(&[arg!([NAME] ...).id("uninstall")]))
 }
 
+fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
+    println!("");
+    println!("running install command");
+    let _  = run_command("rpm".to_string(), "-U".to_string(), arr[1].clone()].to_vec());
+    Some((String::from(""), vec![]))
+}
+
+fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
+    println!("");
+    println!("running install command");
+    let _  = run_command("rpm".to_string(), "-R".to_string(), arr[1].clone()].to_vec());
+    Some((String::from(""), vec![]))
+}
+
+
 pub fn default() -> PackageManager {
     PackageManager {
+        install,
+        uninstall,
         uninstall_command,
         install_command,
         name: String::from("rpm"),

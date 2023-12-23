@@ -20,6 +20,21 @@ pub fn uninstall_command() -> clap::Command {
     )
 }
 
+fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
+    println!("");
+    println!("running install command");
+    let _  = run_command(&[arr[0].clone(), "-i".to_string(), arr[1].clone()].to_vec());
+    Some((String::from(""), vec![]))
+}
+
+fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
+    println!("");
+    println!("running install command");
+    let _  = run_command(&[arr[0].clone(), "-u".to_string(), arr[1].clone()].to_vec());
+    Some((String::from(""), vec![]))
+}
+
+
 pub fn default() -> PackageManager {
     PackageManager {
         uninstall_command,
