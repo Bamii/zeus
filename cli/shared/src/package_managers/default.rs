@@ -1,5 +1,6 @@
 use crate::models::package_manager::{PackageManager, PackageMeta};
 use clap::arg;
+use crate::utils::run_command;
 
 pub fn install_command() -> clap::Command {
     clap::Command::new("package")
@@ -32,12 +33,16 @@ pub fn uninstall_command() -> clap::Command {
 }
 
 fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("we are you {:?}", arr);
+    println!("");
+    println!("running install command");
+    run_command(&arr[..].to_vec());
     Some((String::from(""), vec![]))
 }
 
 fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
-    println!("{:?}", arr);
+    println!("");
+    println!("running install command");
+    run_command(&arr[..].to_vec());
     Some((String::from(""), vec![]))
 }
 

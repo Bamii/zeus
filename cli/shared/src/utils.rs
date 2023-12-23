@@ -391,13 +391,13 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
                 &"new" => {
                     for package in &packages {
                         let pkg = package.to_string();
-                        let _ = (vendor_repository.install)(&vec![pkg]).unwrap();
+                        let _ = (vendor_repository.install)(&vec![installation.get(0).unwrap().vendor.clone(), pkg]).unwrap();
                     }
                 }
                 &"old" => {
                     for package in &packages {
                         let pkg = package.clone();
-                        let _ = (vendor_repository.uninstall)(&vec![pkg]).unwrap();
+                        let _ = (vendor_repository.uninstall)(&vec![installation.get(0).unwrap().vendor.clone(),]).unwrap();
                     }
                 }
                 _ => panic!("never will happen"),
