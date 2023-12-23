@@ -26,9 +26,13 @@ main(class="my-5 container max-w-[50rem] mx-auto flex flex-col max-lg:bg-[#FFEBC
         div voila! you can now run zeus from anywhere.
 
       div 
-        div start the zeusd service in the background using
+        div to get your minion to pick up your config updates, start the zeusd service in the background using
           pre.whitespace-normal > zeusd &      // linux
           pre.whitespace-normal > start /b zeusd   // windows cmd (NOT powershell)
+
+      div 
+        div if you don't want to run a background service and are fine with updating your config at your convinience, you can run the following command whenever you want to update your config.
+          pre.whitespace-normal > zeus config upload
 
 include includes/footer         
 

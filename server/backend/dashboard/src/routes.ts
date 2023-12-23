@@ -190,9 +190,9 @@ router.post(
             })
 
             if (device)
-                return sendError(
+                return sendSuccess(
                     res,
-                    'respectfully, sir/ma... you have already linked this device.'
+                    'yay, sir/ma... you have already linked this device.'
                 )
 
             const devices = await devicesRepository.getUsersDevices(
