@@ -111,6 +111,9 @@ importers:
       logger:
         specifier: workspace:*
         version: link:../../shared/logger
+      newrelic:
+        specifier: latest
+        version: 11.0.0
       notifications:
         specifier: workspace:*
         version: link:../../shared/notifications

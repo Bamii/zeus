@@ -16,7 +16,10 @@ import { Unkey } from '@unkey/api'
 import { apiKeyAuth, isDeviceRegistered } from 'auth'
 import fs from 'fs/promises'
 
-const unkey = new Unkey({ rootKey: 'unkey_3ZnyCB4BHxHbJbvfaWSihqRX' })
+const UNKEY_ROOTKEY = process.env.UNKEY_ROOTKEY
+const UNKEY_APIKEY = process.env.UNKEY_APIKEY
+
+const unkey = new Unkey({ rootKey: UNKEY_ROOTKEY })
 const router = Router()
 //const cache = Container.get(CacheInstance);
 const userRepository = Container.get(UserRepository)
@@ -139,23 +142,19 @@ router.post('/register', validator.register, async (_req, res, next) => {
         }
 
         let password = await hashPassword(_req.body.password)
-        console.log(password)
         let new_user = await userRepository.createUser({
             ..._req.body,
             password,
         })
 
         const created = await unkey.keys.create({
-            apiId: 'api_8qR9AiEBdvrUCAuES4q569',
+            apiId: UNKEY_APIKEY,
             byteLength: 16,
             ownerId: `${new_user.id}`,
             meta: {},
         })
 
         // save the key.
-        console.log(created)
-        console.log(new_user)
-
         await keyRepository.create({
             user_id: new_user.id,
             key: created.result.key,
@@ -198,7 +197,7 @@ router.post(
             const devices = await devicesRepository.getUsersDevices(
                 parseInt(req.user.id)
             )
-            if (devices.length > 5) {
+            if (devices.length > 3) {
                 return sendError(
                     res,
                     'you already have 3 devices mate. please buy a subscription. saanu mi'
@@ -278,7 +277,6 @@ router.get(
             const content = await config_blob.arrayBuffer()
 
             //console.log(hash256(content))
-            console.log(config_blob)
             await fs.writeFile('/config.yaml', new DataView(content))
 
             res.sendFile('/config.yaml')
