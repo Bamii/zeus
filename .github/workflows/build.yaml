@@ -76,37 +76,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile zeus
-        id: compile-zeus
-        uses: rust-build/rust-build.action@v1.4.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          SRC_DIR: cli/zeus
-          ARCHIVE_NAME: zeus.${{ matrix.label }}
-          MINIFY: true
-          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
-          RUSTTARGET: ${{ matrix.target }}
-          ARCHIVE_TYPES: ${{ matrix.archive }}
-          UPLOAD_MODE: none
+        run: |
+          cd cli
+          cargo build -p zeus --release --target x86_64-apple-darwin 
+          ls
 
       - name: Compile zeusd
-        id: compile-zeusd
-        uses: rust-build/rust-build.action@v1.4.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          SRC_DIR: cli/zeusd
-          ARCHIVE_NAME: zeusd.${{ matrix.label }}
-          MINIFY: true
-          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
-          RUSTTARGET: ${{ matrix.target }}
-          ARCHIVE_TYPES: ${{ matrix.archive }}
-          UPLOAD_MODE: none
+        run: |
+          cd cli
+          cargo build -p zeusd --release --target x86_64-apple-darwin 
+          ls
 
       - name: zip zeus.
         run: |
           mkdir -p cli/out
-          cd output
+          cd cli/target/release
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
