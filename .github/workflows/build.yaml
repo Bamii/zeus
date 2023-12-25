@@ -80,7 +80,7 @@ jobs:
 
       - name: Compile zeus
         run: |
-          mkdir build_dir
+          mkdir build_dir/
           cd cli
           cargo build -p zeus --release --target x86_64-apple-darwin --target-dir ./build_dir
           ls
@@ -94,7 +94,7 @@ jobs:
       - name: zip zeus.
         run: |
           mkdir -p cli/out
-          cd cli/build_dir/
+          cd cli/build_dir/${{ matrix.target }}/release
           ls
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
