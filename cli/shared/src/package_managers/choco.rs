@@ -92,14 +92,30 @@ fn get_package_and_version(package: &str) -> PackageMeta {
 fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _ = run_command(&[arr[0].clone(), "install".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
+    let _ = run_command(
+        &[
+            arr[0].clone(),
+            "install".to_string(),
+            "-y".to_string(),
+            arr[1].clone(),
+        ]
+        .to_vec(),
+    );
     Some((String::from(""), vec![]))
 }
 
 fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _ = run_command(&[arr[0].clone(), "uninstall".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
+    let _ = run_command(
+        &[
+            arr[0].clone(),
+            "uninstall".to_string(),
+            "-y".to_string(),
+            arr[1].clone(),
+        ]
+        .to_vec(),
+    );
     Some((String::from(""), vec![]))
 }
 pub fn default() -> PackageManager {

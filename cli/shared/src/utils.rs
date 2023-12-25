@@ -1,6 +1,7 @@
 extern crate mac_address;
 
 use base64::{engine::general_purpose, Engine as _};
+use dirs;
 use hex;
 use mac_address::get_mac_address;
 use serde::Deserialize;
@@ -14,7 +15,6 @@ use std::fs;
 use std::path;
 use std::process;
 use std::u8;
-use dirs;
 
 use crate::models::package::{PackageDetailsLocal, PackageManifest};
 use crate::models::package_manager_repository::{
@@ -96,7 +96,7 @@ pub fn get_bolt_path() -> String {
 
 pub fn get_zeus_dir() -> String {
     let mut zeus_dir = path::PathBuf::from(dirs::home_dir().unwrap());
-        zeus_dir.push(".zeus");
+    zeus_dir.push(".zeus");
 
     String::from(zeus_dir.as_path().to_str().unwrap_or(""))
 }
@@ -300,6 +300,9 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
 
     let cloud_config = cloud_config.unwrap();
 
+    let content = serde_yaml::to_string(&cloud_config).unwrap();
+    update_local_file_config(content.as_str());
+
     let cloud_config_packages: Vec<PackageDetailsLocal> = cloud_config
         .packages
         .values()
@@ -333,8 +336,6 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
     let group_by_name = package_collective.group_by(|a, b| a.name.cmp(&b.name) == Ordering::Equal);
 
     let mut diffed: Vec<&PackageDetailsLocal> = vec![];
-    println!(" --------> group by name: {:?}", &group_by_name);
-    println!("");
     for group in group_by_name {
         let mut _action = "install";
 
@@ -369,10 +370,7 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
     // sort the diffed packages and group them by vendors,
     diffed.sort_by(|a, b| a.vendor.partial_cmp(&b.vendor).unwrap());
     let group_by_vendor = diffed.group_by(|a, b| a.vendor.cmp(&b.vendor) == Ordering::Equal);
-    println!(" --------> diffed: {:?}", &diffed);
-    println!("");
 
-    println!(" --------> group by vendor: {:?}", &group_by_vendor);
     for by_vendor in group_by_vendor {
         let _vendor = &by_vendor.get(0).unwrap().vendor;
         let vendor_repository = packages.get(_vendor).unwrap();
@@ -391,20 +389,28 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
                 &"new" => {
                     for package in &packages {
                         let pkg = package.to_string();
-                        let _ = (vendor_repository.install)(&vec![installation.get(0).unwrap().vendor.clone(), pkg]).unwrap();
+                        println!("installing {:?}", &installation.get(0).unwrap().name);
+                        let _ = (vendor_repository.install)(&vec![
+                            installation.get(0).unwrap().vendor.clone(),
+                            pkg,
+                        ])
+                        .unwrap();
                     }
                 }
                 &"old" => {
                     for package in &packages {
                         let pkg = package.clone();
-                        let _ = (vendor_repository.uninstall)(&vec![installation.get(0).unwrap().vendor.clone(), pkg]).unwrap();
+                        println!("uninstalling {:?}", &installation.get(0).unwrap().name);
+                        let _ = (vendor_repository.uninstall)(&vec![
+                            installation.get(0).unwrap().vendor.clone(),
+                            pkg,
+                        ])
+                        .unwrap();
                     }
                 }
                 _ => panic!("never will happen"),
             };
 
-            let content = serde_yaml::to_string(&cloud_config).unwrap();
-            update_local_file_config(content.as_str());
             println!("-----------------------------");
         }
 

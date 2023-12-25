@@ -4,8 +4,8 @@ extern crate cron_job;
 use cron_job::CronJob;
 use shared::models::package_manager_repository::PackageManagerRepository;
 use shared::utils::{
-    display_banner, get_and_install_latest_cloud_config, 
-    setup_package_repository, ensure_zeus_files
+    display_banner, ensure_zeus_files, get_and_install_latest_cloud_config,
+    setup_package_repository,
 };
 
 #[tokio::main]
