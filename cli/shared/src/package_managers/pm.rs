@@ -2,6 +2,7 @@ use crate::models::package_manager::PackageManager;
 
 use crate::package_managers::default::default as default_package_manager;
 use clap::arg;
+use crate::utils::run_command;
 
 fn install_command() -> clap::Command {
     clap::Command::new("package").arg(

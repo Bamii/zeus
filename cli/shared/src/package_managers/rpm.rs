@@ -1,6 +1,7 @@
 use crate::models::package_manager::PackageManager;
 use crate::package_managers::default::default as default_package_manager;
 use clap::arg;
+use crate::utils::run_command;
 
 pub fn install_command() -> clap::Command {
     clap::Command::new("package")
@@ -29,24 +30,24 @@ pub fn uninstall_command() -> clap::Command {
 fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _  = run_command("rpm".to_string(), "-U".to_string(), arr[1].clone()].to_vec());
+    let _  = run_command(&["rpm".to_string(), "-U".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 
 fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _  = run_command("rpm".to_string(), "-R".to_string(), arr[1].clone()].to_vec());
+    let _  = run_command(&["rpm".to_string(), "-R".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 
 
 pub fn default() -> PackageManager {
     PackageManager {
-        install,
-        uninstall,
         uninstall_command,
         install_command,
+        install,
+        uninstall,
         name: String::from("rpm"),
         packages: vec!["rpm".to_string()],
         ..default_package_manager()

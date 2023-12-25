@@ -1,6 +1,7 @@
 use crate::models::package_manager::PackageManager;
 use crate::package_managers::default::default as default_package_manager;
 use clap::arg;
+use crate::utils::run_command;
 
 pub fn install_command() -> clap::Command {
     clap::Command::new("package").arg(
@@ -39,6 +40,8 @@ pub fn default() -> PackageManager {
     PackageManager {
         uninstall_command,
         install_command,
+        install,
+        uninstall,
         name: String::from("default_flag_only"),
         packages: vec!["rpm"].iter().map(|a| a.to_string()).collect(),
         ..default_package_manager()

@@ -1,6 +1,7 @@
 use crate::models::package_manager::PackageManager;
 use crate::package_managers::default::default as default_package_manager;
 use clap::arg;
+use crate::utils::run_command;
 
 pub fn install_command() -> clap::Command {
     clap::Command::new("package")
@@ -29,14 +30,14 @@ pub fn uninstall_command() -> clap::Command {
 fn install(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _  = run_command(&["apt-get", "install".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
+    let _  = run_command(&["apt-get".to_string(), "install".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 
 fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     println!("");
     println!("running install command");
-    let _  = run_command(&["apt-get", "uninstall".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
+    let _  = run_command(&["apt-get".to_string(), "uninstall".to_string(), "-y".to_string(), arr[1].clone()].to_vec());
     Some((String::from(""), vec![]))
 }
 
@@ -44,6 +45,8 @@ pub fn default() -> PackageManager {
     PackageManager {
         uninstall_command,
         install_command,
+        install,
+        uninstall,
         name: String::from("apt-get"),
         packages: vec!["apt-get".to_string(), "apt".to_string()],
         ..default_package_manager()
