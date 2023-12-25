@@ -7,7 +7,7 @@ pub fn install_command() -> clap::Command {
     clap::Command::new("package").subcommand(
         clap::Command::new("install").args(&[arg!([NAME] ...)
             .id("install")
-            .short('y')
+            //.short('y')
             .action(ArgAction::Set)
             .num_args(1..)
             .allow_hyphen_values(true)]),
@@ -118,6 +118,7 @@ fn uninstall(arr: &Vec<String>) -> Option<(String, Vec<String>)> {
     );
     Some((String::from(""), vec![]))
 }
+
 pub fn default() -> PackageManager {
     PackageManager {
         name: String::from("choco"),

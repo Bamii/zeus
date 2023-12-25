@@ -178,8 +178,6 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
                 }
                 false => {
                     println!("");
-                    println!("you need some things done... an error occured");
-                    println!("nooooo");
                     None
                 }
             }

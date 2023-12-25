@@ -23,10 +23,9 @@ use crate::models::package_manager_repository::{
 
 use crate::package_managers::apt::default as apt;
 use crate::package_managers::choco::default as choco;
-//use crate::package_managers::default::default as default_commander;
 use crate::package_managers::default_command_only::default as default_command_only;
 use crate::package_managers::default_flag_only::default as default_flag_only;
-use crate::package_managers::pm::default as pacman;
+use crate::package_managers::pacman::default as pacman;
 use crate::package_managers::rpm::default as rpm;
 //use crate::package_managers::scoop::default as scoop;
 
