@@ -11,6 +11,9 @@ permissions:
 
 jobs:
   predeploy:
+    outputs:
+      should_deploy_cli: ${{ steps.predeploy-cli.outputs.cli }}
+      should_deploy_server: ${{ steps.predeploy-server.outputs.server }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -57,9 +60,68 @@ jobs:
             cli: ${{ steps.predeploy-cli.outputs.cli }}
             server: ${{ steps.predeploy-server.outputs.server }}
 
+  deploy_cli_macos:
+    needs: predeploy
+    if: ${{ contains(needs.predeploy.should_deploy_cli, 'true') }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-apple-darwin
+            label: macos
+            archive: zip
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compile zeus
+        id: compile-zeus
+        uses: rust-build/rust-build.action@v1.4.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          SRC_DIR: cli/zeus
+          ARCHIVE_NAME: zeus.${{ matrix.label }}
+          MINIFY: true
+          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+          UPLOAD_MODE: none
+
+      - name: Compile zeusd
+        id: compile-zeusd
+        uses: rust-build/rust-build.action@v1.4.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          SRC_DIR: cli/zeusd
+          ARCHIVE_NAME: zeusd.${{ matrix.label }}
+          MINIFY: true
+          TOOLCHAIN_VERSION: nightly-x86_64-unknown-linux-musl
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+          UPLOAD_MODE: none
+
+      - name: zip zeus.
+        run: |
+          mkdir -p cli/out
+          cd output
+          zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
+
+      - uses: hkusu/s3-upload-action@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-bucket: ${{ secrets.AWS_S3_BUCKET }}
+          public: true
+          destination-dir: /
+          aws-region: us-east-1
+          file-path: cli/out/zeus.${{ matrix.label }}.zip
+
   deploy_cli:
     needs: predeploy
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -70,9 +132,6 @@ jobs:
           - target: x86_64-unknown-linux-musl
             label: linux
             archive: tar.gz
-          - target: x86_64-apple-darwin
-            label: macos
-            archive: zip
     steps:
       - name: Checkout
         uses: actions/checkout@v4
