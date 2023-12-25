@@ -67,7 +67,7 @@ fn link_action(c: &seahorse::Context) {
     println!("linking this computer to zeus...");
 
     if &c.args.len() == &0 {
-        println!("please input your api key...");
+        println!("please input your api key..");
         println!("");
         return ();
     }
