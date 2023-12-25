@@ -74,15 +74,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Read data from previous step
-        id: read-data # must have an id so that you can access the output from this step which contains the shared data
-        uses: edumserrano/share-jobs-data@v1
-        with:
-          command: read-data-current-workflow
-
       - name: Compile zeus
         id: compile-zeus
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -97,7 +90,6 @@ jobs:
 
       - name: Compile zeusd
         id: compile-zeusd
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -111,14 +103,12 @@ jobs:
           UPLOAD_MODE: none
 
       - name: zip zeus.
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         run: |
           mkdir -p cli/out
           cd output
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
-        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
