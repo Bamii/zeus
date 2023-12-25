@@ -405,7 +405,7 @@ pub async fn get_and_install_latest_cloud_config(packages: &PackageManagerReposi
 
             let content = serde_yaml::to_string(&cloud_config).unwrap();
             update_local_file_config(content.as_str());
-            println!("------------------------------");
+            println!("-----------------------------");
         }
 
         println!("");
