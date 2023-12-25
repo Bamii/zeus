@@ -94,7 +94,7 @@ jobs:
       - name: zip zeus.
         run: |
           mkdir -p cli/out
-          cd cli/build_dir/release
+          cd cli/build_dir/
           ls
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 

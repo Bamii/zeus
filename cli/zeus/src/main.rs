@@ -83,7 +83,7 @@ fn download_config_action(_: &seahorse::Context) {
         let packages_repository = setup_package_repository();
         get_and_install_latest_cloud_config(&packages_repository).await;
 
-        println!("------------------------------");
+        println!("-----------------------------");
         println!("to upload a config, either append zeus to your package install command as in:");
         println!("> zeus choco install -y zig");
         println!("or if you already have a config in your zeus root directory: at {}. run the command below", get_zeus_dir());
