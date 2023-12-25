@@ -11,9 +11,6 @@ permissions:
 
 jobs:
   predeploy:
-    outputs:
-      should_deploy_cli: ${{ steps.predeploy-cli.outputs.cli }}
-      should_deploy_server: ${{ steps.predeploy-server.outputs.server }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,7 +59,6 @@ jobs:
 
   deploy_cli_macos:
     needs: predeploy
-    if: ${{ contains(needs.predeploy.should_deploy_cli, 'true') }}
     runs-on: macos-latest
     strategy:
       fail-fast: false
@@ -75,8 +71,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Read data from previous step
+        id: read-data # must have an id so that you can access the output from this step which contains the shared data
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: read-data-current-workflow
+
       - name: Compile zeus
         id: compile-zeus
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -91,6 +94,7 @@ jobs:
 
       - name: Compile zeusd
         id: compile-zeusd
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -104,12 +108,14 @@ jobs:
           UPLOAD_MODE: none
 
       - name: zip zeus.
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         run: |
           mkdir -p cli/out
           cd output
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -121,7 +127,6 @@ jobs:
 
   deploy_cli:
     needs: predeploy
-    if: ${{ contains(needs.predeploy.should_deploy_cli, 'true') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -137,8 +142,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Read data from previous step
+        id: read-data # must have an id so that you can access the output from this step which contains the shared data
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: read-data-current-workflow
+
       - name: Compile zeus
         id: compile-zeus
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -153,6 +165,7 @@ jobs:
 
       - name: Compile zeusd
         id: compile-zeusd
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -166,12 +179,14 @@ jobs:
           UPLOAD_MODE: none
 
       - name: zip zeus.
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         run: |
           mkdir -p cli/out
           cd output
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
+        if: ${{ contains(steps.read-data.outputs.cli, 'true') }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -183,13 +198,19 @@ jobs:
 
   deploy_server:
     needs: predeploy
-    if: ${{ contains(needs.predeploy.should_deploy_server, 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Read data
+        id: read-data # must have an id so that you can access the output from this step which contains the shared data
+        uses: edumserrano/share-jobs-data@v1
+        with:
+          command: read-data-current-workflow
+
       - name: Configure AWS credentials
+        if: ${{ contains(steps.read-data.outputs.server, 'true') }}
         uses: aws-actions/configure-aws-credentials@v4 # More information on this action can be found below in the 'AWS Credentials' section
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
@@ -197,10 +218,12 @@ jobs:
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
+        if: ${{ contains(steps.read-data.outputs.server, 'true') }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: build and deploy server
+        if: ${{ contains(steps.read-data.outputs.server, 'true') }}
         id: predeploy
         run: |
           cd server && ls 
@@ -209,6 +232,7 @@ jobs:
           docker push ${{ secrets.DOCKER_REPOSITORY }}:latest
 
       - name: Deploy to server
+        if: ${{ contains(steps.read-data.outputs.server, 'true') }}
         uses: easingthemes/ssh-deploy@main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
