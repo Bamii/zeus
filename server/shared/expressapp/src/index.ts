@@ -45,7 +45,7 @@ const expressApp = async (router: Router, _mw?: string[]) => {
     app.use('/', router)
 
     const apitoolkitClient = await APIToolkit.NewClient({
-        apiKey: process.env.API_TOOLKIT_KEY,
+        apiKey: process.env.API_TOOLKIT_KEY ?? '',
     })
     app.use(apitoolkitClient.expressMiddleware)
     app.use(notFoundMiddleware, errorMiddleware)
