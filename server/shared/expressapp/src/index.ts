@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import { rateLimit } from 'express-rate-limit'
 require('newrelic')
+import { APIToolkit } from 'apitoolkit-express'
 
 import morgan from './config/morgan'
 
@@ -28,7 +29,7 @@ const limiter = rateLimit({
 })
 
 // Apply the rate limiting middleware to all requests.
-const expressApp = (router: Router, _mw?: string[]) => {
+const expressApp = async (router: Router, _mw?: string[]) => {
     const app = express()
     app.use(limiter)
     app.use(cors())
@@ -42,6 +43,11 @@ const expressApp = (router: Router, _mw?: string[]) => {
     app.use('/public', express.static(path.join(__dirname, '../public')))
 
     app.use('/', router)
+
+    const apitoolkitClient = await APIToolkit.NewClient({
+        apiKey: process.env.API_TOOLKIT_KEY,
+    })
+    app.use(apitoolkitClient.expressMiddleware)
     app.use(notFoundMiddleware, errorMiddleware)
 
     const port = config.port || randomPort()
