@@ -94,6 +94,7 @@ jobs:
         run: |
           mkdir -p cli/out
           cd cli/target/release
+          ls
           zip ../cli/out/zeus.${{ matrix.label }}.zip zeus*
 
       - uses: hkusu/s3-upload-action@v2
