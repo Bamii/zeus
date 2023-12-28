@@ -67,12 +67,6 @@ pub fn run_command(cmds: &Vec<String>) -> Result<process::Output, std::io::Error
         process::Command::new("cmd").args(command).output()
     } else {
         let arr: Vec<&str> = vec!["-c"];
-<<<<<<< Updated upstream
-        let command = [arr, cmds.iter().map(|a| a.as_str()).collect::<Vec<&str>>()]
-            .concat()
-            .into_iter();
-
-=======
         let xcommand = [cmds
             .iter()
             .map(|a| a.as_str())
@@ -80,16 +74,14 @@ pub fn run_command(cmds: &Vec<String>) -> Result<process::Output, std::io::Error
             .join(" ")];
         let bcommand = xcommand.iter().map(|a| a.as_str()).collect::<Vec<&str>>();
         let command = [arr, bcommand].concat().into_iter();
-        println!("{:?}", command);
->>>>>>> Stashed changes
         process::Command::new("sh").args(command).output()
     }
 }
 
 pub fn install_package_manager(_package_manager: String) {
     // fetch script from server, install script.
-    //let url = String::from("https://dummyjson.com/quotes");
-    //let response = reqwest::get(url).await?;
+    // let url = String::from("https://dummyjson.com/quotes");
+    // let response = reqwest::get(url).await?;
 }
 
 pub fn get_zeus_config_path() -> String {
