@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express'
-//import Database from 'database'
+//import Database from 'database';
 import { User } from 'database/src/models'
 import { verifyKey } from '@unkey/api'
 import bcrypt from 'bcrypt'
