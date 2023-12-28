@@ -1,5 +1,5 @@
 [package]
-name = "zeus"
+name = "localsync"
 authors = ["bami"]
 description = "sync your package installs across environments"
 version = "0.3.0"
