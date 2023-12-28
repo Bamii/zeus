@@ -4,14 +4,14 @@ use clap::arg;
 
 pub fn install_command() -> clap::Command {
     clap::Command::new("package").subcommand(
-        clap::Command::new("install").args(&[arg!([NAME] ...).id("install").short('y')]),
+        clap::Command::new("install").args(&[arg!([NAME] ...).id("install")]),
     )
     //.subcommand(clap::Command::new("add").args(&[arg!([NAME] ...).id("install")]))
 }
 
 pub fn uninstall_command() -> clap::Command {
     clap::Command::new("package").subcommand(
-        clap::Command::new("uninstall").args(&[arg!([NAME] ...).id("uninstall").short('y')]),
+        clap::Command::new("uninstall").args(&[arg!([NAME] ...).id("uninstall")]),
     )
     //.subcommand(clap::Command::new("remove").args(&[arg!([NAME] ...).id("uninstall")]))
 }
