@@ -129,7 +129,22 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
             println!("checking if {} has been installed", program);
             let is_package_manager_installed =
                 match run_command(&vec![program.to_string(), String::from("--version")]) {
+<<<<<<< Updated upstream
                     Ok(output) => output.status.success(),
+=======
+                    Ok(output) => {
+                        println!("{:?}", output);
+                        match output.status.code() {
+                            Some(code) => {
+                                println!("{:?}", code % 256);
+                                println!("{:?}", code);
+
+                                code % 256 == 0
+                            }
+                            None => false,
+                        }
+                    }
+>>>>>>> Stashed changes
                     Err(_) => false,
                 };
 
