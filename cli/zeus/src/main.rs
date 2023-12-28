@@ -130,16 +130,10 @@ fn default_action(c: &seahorse::Context) -> Option<String> {
             let is_package_manager_installed =
                 match run_command(&vec![program.to_string(), String::from("--version")]) {
                     Ok(output) => {
-                        println!("{:?}", output);
                         match output.status.code() {
-				Some(code) => {
-					println!("{:?}", code % 256);
-					println!("{:?}", code);
-
-					code % 256 == 0	
-				},
-				None => false
-			}
+                            Some(code) => code % 256 == 0,
+                            None => false
+                        }
                     }
                     Err(_) => false,
                 };

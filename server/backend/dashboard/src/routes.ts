@@ -71,6 +71,8 @@ router.get(
                     'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.windows.zip',
                 linux_download_link:
                     'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.linux.zip',
+                macos_download_link:
+                    'https://zeus-bkt.s3.amazonaws.com/artifacts/zeus.macos.zip',
                 auth: !!req.user,
             })
         } catch (e: any) {}
