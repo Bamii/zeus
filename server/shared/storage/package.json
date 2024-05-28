@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.583.0",
     "@supabase/supabase-js": "^2.24.0",
     "config": "workspace:*",
     "logger": "workspace:*",

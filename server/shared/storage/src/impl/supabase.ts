@@ -47,7 +47,7 @@ export default class Supabase implements Storage {
 
     // this function will replace the old file with the latest one provided the file
     // has been uploaded already
-    async upload<T>(file: string, object: T): Promise<string> {
+    async upload(file: string, object: string): Promise<string> {
         log.info(`uploading file: ${file}`)
         console.log(`uploading file: ${file}`)
         log.info(file, object)
@@ -58,6 +58,7 @@ export default class Supabase implements Storage {
                 upsert: true,
                 cacheControl: 3600,
             })
+
         if (error) {
             log.error(error)
             console.log(error)

@@ -1,6 +1,7 @@
 // Create a single supabase client for interacting with the storage.
 import { Token } from 'typedi'
-import Supabase from './impl/supabase'
+// import Supabase from './impl/supabase'
+import AWS from './impl/aws'
 
 export interface Storage {
     client: any
@@ -11,9 +12,9 @@ export interface Storage {
 
     download(file: string): Promise<Blob | null>
 
-    upload<T>(file: string, object: T): Promise<string>
+    upload(file: string, object: string): Promise<string>
 }
 
 export default (function () {
-    return Supabase as Token<Storage>
+    return AWS as Token<Storage>
 })()
