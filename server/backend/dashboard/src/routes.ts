@@ -226,15 +226,14 @@ router.post(
                 user_id: userid,
             })
 
-            const file = atob(req.body.config)
-            const hash = hash256(file)
+            const file = new Buffer(req.body.config, "base64")
+            const hash = hash256(file.toString("ascii"))
 
             if (hash === config?.hash) {
                 return sendError(res, 'file already uploaded', { status: 500 })
             }
 
-            await storage.upload(`${userid}.config.yaml`, file)
-
+            await storage.upload(`${userid}.config.yaml`, file.toString("ascii"))
             await configRepository.updateConfigForUser(userid, { hash })
 
             return sendSuccess(res, 'yayy! upload success')

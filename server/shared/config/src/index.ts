@@ -16,6 +16,10 @@ const config = {
         connection_url: process.env.STORAGE_URL ?? '',
         private_key: process.env.STORAGE_KEY ?? '',
         qr_bucket: 'merchant-qr-codes',
+        region: process.env.STORAGE_REGION ?? '',
+        aws_access_key_id : process.env.AWS_ACCESS_KEY ?? '',
+        aws_secret_access_key : process.env.AWS_SECRET_ACCESS_KEY ?? '',
+        endpoint_url : process.env.ENDPOINT_URL ?? ''
     },
     queue: {
         connection_url: process.env.QUEUE_CONNECTION_URL ?? '',
