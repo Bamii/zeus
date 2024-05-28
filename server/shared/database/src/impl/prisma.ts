@@ -17,6 +17,7 @@ export class Prisma extends Database {
     connect(): Database {
         try {
             this.client = new PrismaClient()
+            this.client.$connect();
             log.info('connected to database.')
             return this
         } catch (error: any) {
