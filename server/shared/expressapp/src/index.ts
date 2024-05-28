@@ -50,7 +50,7 @@ const expressApp = async (router: Router, _mw?: string[]) => {
         })
         app.use(apitoolkitClient.expressMiddleware)
     } catch (error) {}
-    
+
     app.use(notFoundMiddleware, errorMiddleware)
 
     const port = config.port || randomPort()
