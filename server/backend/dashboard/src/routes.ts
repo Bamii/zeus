@@ -110,13 +110,9 @@ router.post('/login', validator.login, async (req: any & User, res) => {
         password: req.body.password,
     })
 
-    console.log(comparison)
     if (!comparison) {
         const content = pug.compileFile('views/includes/notification.pug')
         return res.send(content({ text: 'invalid login combination' }))
-        //return sendError(res, "There's no user with that email.", {
-        //    status: 401,
-        //})
     }
 
     let hash = signJWT(user)
@@ -125,7 +121,6 @@ router.post('/login', validator.login, async (req: any & User, res) => {
         httpOnly: true,
     })
     // save the key.
-    console.log(user)
 
     res.setHeader('HX-Redirect', '/dashboard')
     res.send('')
@@ -140,7 +135,6 @@ router.post('/register', validator.register, async (_req, res, next) => {
             return res.send(
                 content({ text: 'a user already exists with that email' })
             )
-            //return sendError(res, "")
         }
 
         let password = await hashPassword(_req.body.password)
@@ -276,15 +270,15 @@ router.get(
 
             const filename = `${userid}.config.yaml`
             const config_blob: Blob = await storage.download(filename)
-            const content = await config_blob.arrayBuffer()
-
-            //console.log(hash256(content))
-            await fs.writeFile('/config.yaml', new DataView(content))
-
-            res.sendFile('/config.yaml')
-
-            //await fs.unlink('config.yaml')
-            return
+            if(config_blob) {
+                const content = await config_blob.arrayBuffer()
+    
+                await fs.writeFile('/config.yaml', new DataView(content))
+                return res.sendFile('/config.yaml')
+                //await fs.unlink('config.yaml')
+            } else {
+                return sendError(res, "you don't have any config")
+            }
         } catch (error) {
             console.log(error)
             return sendError(res, 'an error Occured', { status: 500 })
